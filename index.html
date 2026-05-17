@@ -923,7 +923,8 @@ ${job ? `Job Description:\n${job}` : ''}`;
     }
 
     const data = await response.json();
-    const raw = data.choices[0].message.content.trim();
+    const openAiData = data.choices && data.choices[0] ? data.choices[0] : data;
+    const raw = (openAiData.message ? openAiData.message.content : openAiData.content || '').trim();
     const cleaned = raw.replace(/```json|```/g, '').trim();
     const result = JSON.parse(cleaned);
 
