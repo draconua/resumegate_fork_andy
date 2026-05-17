@@ -39,20 +39,16 @@ export default async function handler(req, res) {
     }
 
     // Ждем, пока Replicate завершит генерацию (обычно 2-3 секунды)
-    let resultUrl = prediction.urls.get;
-    let finalPrediction = prediction;
+let finalPrediction = prediction;
 
-    while (finalPrediction.status !== 'succeeded' && finalPrediction.status !== 'failed') {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const checkRes = await fetch(resultUrl, {
-        headers: { 'Authorization': `Token ${token}` }
-      });
-      finalPrediction = await checkRes.json();
-    }
-
-    if (finalPrediction.status === 'failed') {
-      throw new Error("Llama generation failed on Replicate");
-    }
+while (finalPrediction.status !== 'succeeded' && finalPrediction.status !== 'failed') {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Запрашиваем статус напрямую по ID предсказания
+  const checkRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+    headers: { 'Authorization': `Token ${token}` }
+  });
+  finalPrediction = await checkRes.json();
+}
 
     // Собираем текст ответа
     const rawOutput = Array.isArray(finalPrediction.output) ? finalPrediction.output.join('') : finalPrediction.output;
