@@ -904,7 +904,7 @@ ${cv}
 ${job ? `Job Description:\n${job}` : ''}`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://resumegate.vercel.app/api/analyze', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
