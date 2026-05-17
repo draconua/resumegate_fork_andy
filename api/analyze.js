@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Разрешаем нашему сайту на github.io делать запросы к этому бэкенду
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -12,35 +11,64 @@ export default async function handler(req, res) {
 
   try {
     const { cvText, jobText } = req.body;
+    const token = process.env.REPLICATE_API_TOKEN;
 
-    // Сюда Vercel подставит наш секретный ключ, который никто не увидит
-    const apiKey = process.env.OPENAI_API_KEY;
+    const systemPrompt = `You are an expert ATS optimizer. Analyze the CV against the job description. You MUST respond ONLY with a raw JSON object containing these keys: score (number 0-100), feedback (string), missingKeywords (array of strings). Do not include markdown code blocks like \\\`\\\`\\\`json.`;
+    const userPrompt = `CV Text:\n${cvText}\n\nJob Description:\n${jobText || 'General ATS Scan'}`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Делаем запрос к официальному API Replicate для модели Llama 3
+    const response = await fetch('https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Token ${token}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert ATS (Applicant Tracking System) optimizer. Analyze the CV against the job description. Provide scores, missing keywords, and structural feedback.'
-          },
-          {
-            role: 'user',
-            content: `CV Text:\n${cvText}\n\nJob Description:\n${jobText || 'General ATS Scan'}`
-          }
-        ],
-        temperature: 0.3
+        input: {
+          prompt: `${systemPrompt}\n\nUser Request:\n${userPrompt}`,
+          max_tokens: 1000,
+          temperature: 0.3
+        }
       })
     });
 
-    const data = await response.json();
-    res.status(200).json(data);
+    const prediction = await response.json();
+
+    if (prediction.error) {
+      return res.status(400).json({ error: prediction.error });
+    }
+
+    // Ждем, пока Replicate завершит генерацию (обычно 2-3 секунды)
+    let resultUrl = prediction.urls.get;
+    let finalPrediction = prediction;
+
+    while (finalPrediction.status !== 'succeeded' && finalPrediction.status !== 'failed') {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const checkRes = await fetch(resultUrl, {
+        headers: { 'Authorization': `Token ${token}` }
+      });
+      finalPrediction = await checkRes.json();
+    }
+
+    if (finalPrediction.status === 'failed') {
+      throw new Error("Llama generation failed on Replicate");
+    }
+
+    // Собираем текст ответа
+    const rawOutput = Array.isArray(finalPrediction.output) ? finalPrediction.output.join('') : finalPrediction.output;
+    const cleaned = rawOutput.replace(/```json|```/g, '').trim();
+
+    // Отправляем сайту в формате, который он ожидает
+    res.status(200).json({
+      choices: [{
+        message: {
+          content: cleaned
+        }
+      }]
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const errorJson = { score: 0, feedback: `Replicate Server Error: ${error.message}`, missingKeywords: [] };
+    res.status(200).json({ choices: [{ message: { content: JSON.stringify(errorJson) } }] });
   }
 }
