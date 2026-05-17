@@ -11,45 +11,43 @@ export default async function handler(req, res) {
 
   try {
     const { cvText, jobText } = req.body;
-    const token = process.env.REPLICATE_API_TOKEN;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    const systemPrompt = "You are an expert ATS optimizer. Analyze the CV against the job description. You MUST respond ONLY with a raw JSON object containing these keys: score (number 0-100), feedback (string), missingKeywords (array of strings). Do not include markdown code blocks like ```json.";
+    const systemPrompt = "You are an expert ATS optimizer. Analyze the CV against the job description. You MUST respond ONLY with a raw JSON object containing these exact keys: score (number 0-100), feedback (string), missingKeywords (array of strings). Do not include markdown code blocks like ```json.";
     const userPrompt = `CV Text:\n${cvText}\n\nJob Description:\n${jobText || 'General ATS Scan'}`;
 
-    // Делаем один прямой запрос к быстрой модели Llama 3 8B Instruct
-    const response = await fetch('[https://api.replicate.com/v1/models/meta/meta-llama-3-8b-instruct/predictions](https://api.replicate.com/v1/models/meta/meta-llama-3-8b-instruct/predictions)', {
+    // Делаем прямой запрос к официальному API Google Gemini 1.5 Flash
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json',
-        // Этот заголовок заставляет Replicate удерживать запрос и вернуть результат СРАЗУ, без циклов ожидания!
-        'Prefer': 'wait' 
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        input: {
-          prompt: userPrompt,
-          system_prompt: systemPrompt,
-          max_new_tokens: 1000,
-          temperature: 0.2
+        contents: [{
+          parts: [{ text: `${systemPrompt}\n\nUser Request:\n${userPrompt}` }]
+        }],
+        generationConfig: {
+          // Включаем строгий JSON режим на стороне Google
+          responseMimeType: "application/json",
+          temperature: 0.3
         }
       })
     });
 
-    const prediction = await response.json();
+    const data = await response.json();
 
-    if (prediction.error) {
-      throw new Error(prediction.error);
+    if (data.error) {
+      throw new Error(data.error.message || JSON.stringify(data.error));
     }
 
-    // Извлекаем готовый текст ответа
-    const rawOutput = Array.isArray(prediction.output) ? prediction.output.join('') : (prediction.output || '');
-    const cleaned = rawOutput.replace(/```json|```/g, '').trim();
+    // Извлекаем текст из структуры ответа Gemini
+    const rawOutput = data.candidates[0].content.parts[0].text.trim();
 
-    // Отправляем на сайт
+    // Отправляем фронтенду в том формате, который ожидает index.html
     res.status(200).json({
       choices: [{
         message: {
-          content: cleaned
+          content: rawOutput
         }
       }]
     });
@@ -57,7 +55,7 @@ export default async function handler(req, res) {
   } catch (error) {
     const errorJson = { 
       score: 0, 
-      feedback: `Ошибка анализа: ${error.message}. Попробуйте еще раз через 10 секунд.`, 
+      feedback: `Ошибка Gemini API: ${error.message}`, 
       missingKeywords: [] 
     };
     res.status(200).json({ choices: [{ message: { content: JSON.stringify(errorJson) } }] });
