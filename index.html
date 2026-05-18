@@ -593,6 +593,7 @@
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
@@ -628,7 +629,7 @@
           <span class="panel-badge">Required</span>
         </div>
         <button type="button" onclick="document.getElementById('fileUpload').click()" style="background: var(--paper-3); color: var(--ink); border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; transition: background 0.2s;">📁 Upload PDF / TXT</button>
-        <input type="file" id="fileUpload" accept=".pdf,.txt" style="display: none;">
+        <input type="file" id="fileUpload" accept=".pdf,.txt,.docx" style="display: none;">
       </div>
       <textarea id="cvText" placeholder="Paste your full CV text here...&#10;&#10;Include: work experience, education, skills, contact info — everything you have.&#10;&#10;The more complete, the better the analysis."></textarea>
     </div>
