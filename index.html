@@ -977,6 +977,43 @@ function renderResults(r) {
   document.getElementById('results').classList.add('visible');
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+// --- ОБРАБОТКА ЗАГРУЗКИ ФАЙЛОВ ---
+document.getElementById('fileUpload').addEventListener('change', async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const textArea = document.getElementById('cvText');
+  textArea.value = "Читаем файл... ⏳";
+
+  // Если это обычный текстовый файл
+  if (file.name.toLowerCase().endsWith('.txt')) {
+    textArea.value = await file.text();
+  } 
+  // Если это PDF
+  else if (file.name.toLowerCase().endsWith('.pdf')) {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+      let fullText = "";
+      
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        // Склеиваем кусочки текста страницы
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + "\n";
+      }
+      textArea.value = fullText;
+    } catch (err) {
+      textArea.value = "⚠ Ошибка при чтении PDF. Файл может быть поврежден или защищен паролем. Пожалуйста, скопируйте текст вручную.";
+      console.error(err);
+    }
+  }
+  
+  // Сбрасываем поле, чтобы можно было выбрать тот же файл снова
+  e.target.value = '';
+});
 </script>
 </body>
 </html>
