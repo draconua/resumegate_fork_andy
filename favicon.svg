@@ -7,13 +7,13 @@
   <rect width="512" height="512" rx="110" ry="110" fill="#c8602a"/>
   <text
     x="256"
-    y="320"
+    y="256"
     font-family="'Playfair Display', Georgia, serif"
     font-weight="900"
-    font-size="210"
+    font-size="235"
     text-anchor="middle"
-    dominant-baseline="auto"
+    dominant-baseline="central"
     fill="white"
-    letter-spacing="2"
+    letter-spacing="4"
   >RG</text>
 </svg>
