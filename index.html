@@ -1000,9 +1000,17 @@ document.getElementById('fileUpload').addEventListener('change', async function(
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        // Склеиваем кусочки текста страницы
-        const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += pageText + "\n";
+        
+        // Изначально склеиваем текст
+        let pageText = textContent.items.map(item => item.str).join(' ');
+        
+        // 🛠 УМНАЯ ОЧИСТКА: чиним ссылки, дефисы и точки
+        pageText = pageText.replace(/([a-zA-Z0-9])\s+-\s+([a-zA-Z0-9])/g, '$1-$2'); // склеиваем дефисы (in/name - surname -> in/name-surname)
+        pageText = pageText.replace(/\s+\/\s+/g, '/'); // убираем пробелы вокруг слешей
+        pageText = pageText.replace(/\s+\.\s+/g, '.'); // убираем пробелы вокруг точек (. com -> .com)
+        pageText = pageText.replace(/\s{2,}/g, ' '); // удаляем двойные/тройные пробелы
+        
+        fullText += pageText + "\n\n";
       }
       textArea.value = fullText;
     } catch (err) {
