@@ -13,8 +13,14 @@ export default async function handler(req, res) {
     const { cvText, jobText } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
     
-    // Перенесли твой детальный промпт на сервер (это безопаснее!)
-    const systemPrompt = `You are an expert ATS (Applicant Tracking System) specialist and career coach. Analyze the CV against the job description. Return ONLY valid JSON with this exact structure:
+    // 📅 Даем ИИ календарь: автоматически получаем сегодняшнюю дату
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const currentYear = new Date().getFullYear();
+    
+    const systemPrompt = `You are an expert ATS (Applicant Tracking System) specialist and career coach. 
+IMPORTANT CONTEXT: Today's date is ${today}. Do NOT flag employment dates up to ${currentYear} as being in the future.
+
+Analyze the CV against the job description. Return ONLY valid JSON with this exact structure:
 {
   "score": 85,
   "verdict": "Strong ATS performance",
@@ -55,11 +61,9 @@ Return ONLY the JSON object, no markdown, no explanation.`;
     
     const rawOutput = data.candidates[0].content.parts[0].text.trim();
     
-    // Отправляем фронтенду
     res.status(200).json({ choices: [{ message: { content: rawOutput } }] });
     
   } catch (error) {
-    // Безопасный фоллбэк, если что-то пойдет не так, чтобы сайт не завис
     const errorJson = { 
       score: 0, 
       verdict: "Error", 
