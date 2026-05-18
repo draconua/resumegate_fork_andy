@@ -3,19 +3,17 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&amp;display=swap');
     </style>
-    <clipPath id="rounded">
-      <rect width="512" height="512" rx="100" ry="100"/>
-    </clipPath>
   </defs>
-  <rect width="512" height="512" rx="100" ry="100" fill="#c8602a"/>
+  <rect width="512" height="512" rx="110" ry="110" fill="#c8602a"/>
   <text
     x="256"
-    y="340"
+    y="320"
     font-family="'Playfair Display', Georgia, serif"
     font-weight="900"
-    font-size="280"
+    font-size="210"
     text-anchor="middle"
+    dominant-baseline="auto"
     fill="white"
-    letter-spacing="-5"
+    letter-spacing="2"
   >RG</text>
 </svg>
