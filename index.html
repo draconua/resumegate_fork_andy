@@ -994,7 +994,17 @@ document.getElementById('fileUpload').addEventListener('change', async function(
   if (file.name.toLowerCase().endsWith('.txt')) {
     textArea.value = await file.text();
   } 
-  // Если это PDF
+  else if (file.name.toLowerCase().endsWith('.docx')) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      textArea.value = result.value.trim();
+    } catch (err) {
+      textArea.value = "⚠ Ошибка при чтении DOCX. Скопируйте текст вручную.";
+      console.error(err);
+    }
+  }
+   // Если это PDF
   else if (file.name.toLowerCase().endsWith('.pdf')) {
     try {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
