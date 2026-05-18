@@ -622,9 +622,13 @@
 <section class="tool-wrapper" id="tool">
   <div class="tool-grid">
     <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Your CV / Resume</span>
-        <span class="panel-badge">Required</span>
+      <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="panel-title">Your CV / Resume</span>
+          <span class="panel-badge">Required</span>
+        </div>
+        <button type="button" onclick="document.getElementById('fileUpload').click()" style="background: var(--paper-3); color: var(--ink); border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; transition: background 0.2s;">📁 Upload PDF / TXT</button>
+        <input type="file" id="fileUpload" accept=".pdf,.txt" style="display: none;">
       </div>
       <textarea id="cvText" placeholder="Paste your full CV text here...&#10;&#10;Include: work experience, education, skills, contact info — everything you have.&#10;&#10;The more complete, the better the analysis."></textarea>
     </div>
