@@ -813,8 +813,6 @@
 </footer>
 
 <script>
-const OPENAI_KEY = 'REMOVED_FOR_SECURITY';
-
 const loadingMessages = [
   "Parsing document structure...",
   "Checking ATS compatibility...",
@@ -867,66 +865,20 @@ async function analyzeCV() {
 
   document.getElementById('loadingState').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  const prompt = `You are an expert ATS (Applicant Tracking System) specialist and career coach. Analyze the following CV${job ? ' against the job description' : ''} and return ONLY valid JSON with this exact structure:
-
-{
-  "score": <integer 0-100>,
-  "verdict": "<3-6 word punchy verdict like 'Needs significant improvement' or 'Strong ATS performance'>",
-  "summary": "<2 sentences explaining the score>",
-  "subScores": {
-    "formatting": <0-100>,
-    "keywords": <0-100>,
-    "readability": <0-100>,
-    "completeness": <0-100>
-  },
-  "keywordsFound": ["<word1>", "<word2>", ...],
-  "keywordsMissing": ["<word1>", "<word2>", ...],
-  "issues": [
-    {"severity": "critical|warning|info", "text": "<issue description>"},
-    ...
-  ],
-  "recommendations": [
-    {"title": "<short bold title>", "detail": "<1-2 sentence actionable advice>"},
-    ...
-  ]
-}
-
-Rules:
-- keywordsFound: 6-12 important keywords/phrases that ARE present
-- keywordsMissing: 6-12 important keywords/phrases that are ABSENT but should be added${job ? ' (based on the job description)' : ' (industry-standard terms)'}
-- issues: 4-7 issues, mix of severities. Be specific and actionable.
-- recommendations: exactly 5 specific, prioritized action items
-- Return ONLY the JSON object, no markdown, no explanation
-
-CV:
-${cv}
-
-${job ? `Job Description:\n${job}` : ''}`;
-
   try {
     const response = await fetch('https://resumegate.vercel.app/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cvText: cv, jobText: job })
     });
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error?.message || 'API error');
+      throw new Error(err.error || 'Server error');
     }
 
-    const data = await response.json();
-    const openAiData = data.choices && data.choices[0] ? data.choices[0] : data;
-    const raw = (openAiData.message ? openAiData.message.content : openAiData.content || '').trim();
-    const cleaned = raw.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(cleaned);
+    const result = await response.json();
+    if (result.error) throw new Error(result.error);
 
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
