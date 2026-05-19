@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — ResumeGate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f8f6;
+      --surface: #ffffff;
+      --border: #e8e5df;
+      --accent: #c96442;
+      --text-primary: #1a1917;
+      --text-secondary: #6b6760;
+      --text-muted: #9e9b96;
+      --radius: 12px;
+      --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); }
+
+    .back-link {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .page-header { margin-bottom: 40px; }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(201, 100, 66, 0.08);
+      border: 1px solid rgba(201, 100, 66, 0.18);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 520px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-full {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .contact-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .contact-card .icon-wrap {
+      width: 36px;
+      height: 36px;
+      background: rgba(201, 100, 66, 0.08);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .contact-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .contact-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .contact-card a {
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .contact-card a:hover { text-decoration: underline; }
+
+    /* Form */
+    .card-full h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 520px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+
+    input, select, textarea {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 22px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: -0.01em;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.98); }
+
+    .success-msg {
+      display: none;
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #15803d;
+      margin-top: 14px;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .faq-item:first-child { padding-top: 0; }
+
+    .faq-q {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .faq-a {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">Resume<span>Gate</span></a>
+  <a href="index.html" class="back-link">← Back to tool</a>
+</header>
+
+<main>
+  <div class="page-header">
+    <div class="badge">Support</div>
+    <h1>Contact</h1>
+    <p class="subtitle">Have a question or issue? We're here to help.</p>
+  </div>
+
+  <div class="contact-grid">
+    <div class="card contact-card">
+      <div class="icon-wrap">✉️</div>
+      <h3>General Inquiries</h3>
+      <p>Questions about the product, features, or anything else.</p>
+      <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a>
+    </div>
+    <div class="card contact-card">
+      <div class="icon-wrap">🔑</div>
+      <h3>Pro / Billing Support</h3>
+      <p>Payment questions, account access, subscription issues.</p>
+      <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="card-full">
+    <h2>Send us a message</h2>
+
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label for="name">Your name</label>
+        <input type="text" id="name" placeholder="Alex Smith" />
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@email.com" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="topic">Topic</label>
+      <select id="topic">
+        <option value="">Select a topic…</option>
+        <option value="pro">Pro plan / billing</option>
+        <option value="account">Account / login issue</option>
+        <option value="bug">Bug report</option>
+        <option value="feature">Feature request</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="message">Message</label>
+      <textarea id="message" placeholder="Describe your question or issue…"></textarea>
+    </div>
+
+    <button class="btn" onclick="handleSubmit()">
+      Send message →
+    </button>
+
+    <div class="success-msg" id="successMsg">
+      ✅ Thanks for reaching out! We'll get back to you within 1–2 business days.
+    </div>
+  </div>
+
+  <div class="card-full">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">I can't log in to my Pro account — what should I do?</div>
+      <div class="faq-a">Try resetting your password via the login page. If you still can't access your account, email us at <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a> with the email you used to purchase.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I use ResumeGate for free?</div>
+      <div class="faq-a">Yes — free users get 3 analyses per month. Pro unlocks unlimited scans, AI rewriting, and file export.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is my resume data stored anywhere?</div>
+      <div class="faq-a">No. Resume content is processed temporarily and never saved. See our <a href="privacy.html">Privacy Policy</a> for details.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What AI model powers ResumeGate?</div>
+      <div class="faq-a">We use Google Gemini API for analysis and rewriting. Your data is not used to train the model.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I get a refund?</div>
+      <div class="faq-a">Due to the digital nature of the product, all sales are final. If you have a technical issue, contact us within 7 days and we'll do our best to help.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="index.html">ResumeGate</a> &nbsp;·&nbsp;
+  <a href="privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
+  <a href="terms.html">Terms of Service</a> &nbsp;·&nbsp;
+  <a href="contact.html">Contact</a>
+</footer>
+
+<script>
+  function handleSubmit() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    if (!name || !email || !message) {
+      alert('Please fill in your name, email, and message.');
+      return;
+    }
+
+    // In production: replace with actual form submission (Formspree, EmailJS, etc.)
+    const mailto = `mailto:gateresume@gmail.com?subject=ResumeGate Contact: ${encodeURIComponent(document.getElementById('topic').value || 'General')}&body=Name: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0A%0A${encodeURIComponent(message)}`;
+    window.location.href = mailto;
+
+    document.getElementById('successMsg').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
