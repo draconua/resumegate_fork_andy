@@ -203,19 +203,42 @@
   .plan.featured .plan-btn { background: var(--ink); color: white; }
   .plan.featured .plan-btn:hover { background: var(--accent); border-color: var(--accent); }
 
-  /* FOOTER */
-footer { 
-  border-top: 1px solid var(--border); 
-  padding: 48px 24px; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center;   
-  justify-content: center; 
-  background: var(--paper-2); 
-  text-align: center;    
-  gap: 12px;             
-}
-footer p { font-size: 13px; color: var(--ink-4); margin: 0; }
+ /* FOOTER */
+  footer { 
+    border-top: 1px solid var(--border); 
+    padding: 32px 48px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    background: var(--paper-2); 
+  }
+
+  /* Это магия: заставляем три части футера быть одинакового размера */
+  footer > * {
+    flex: 1;
+  }
+
+  /* Логотип прижимаем влево */
+  footer .logo {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  /* Текст с копирайтом — строго по центру */
+  footer p:nth-of-type(1) {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-4);
+    margin: 0;
+    white-space: nowrap; /* Чтобы не переносился на две строки */
+  }
+
+  /* Ссылки прижимаем вправо */
+  footer p:nth-of-type(2) {
+    text-align: right;
+    font-size: 12px;
+    margin: 0;
+  }
 
   @media (max-width: 768px) {
     nav { padding: 16px 24px; }
