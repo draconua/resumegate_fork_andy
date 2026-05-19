@@ -16,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LE4CP86M9"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -263,7 +264,10 @@
     <a href="#how">How it works</a>
     <a href="#pricing">Pricing</a>
   </div>
-  <button class="nav-cta" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Check My CV →</button>
+  <div id="auth-section" style="display: flex; align-items: center; gap: 12px;">
+    <!-- Эта часть будет меняться через JavaScript -->
+    <button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>
+  </div>
 </nav>
 
 <section class="hero">
@@ -476,6 +480,12 @@
 <script>
 const LEMON_URL = 'https://theresumegate.lemonsqueezy.com/checkout/buy/2cc21afc-e128-4293-b2d0-4af55db2df4f';
 let lastRewrittenText = '';
+// Настройка Supabase
+const supabaseUrl = 'https://zcbvqystbanooiczjqop.supabase.co';
+const supabaseKey = 'sb_publishable_Kq07S3DxE59y4pHNocwaUA_7M7I6-kL';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+let currentUser = null;
 
 const loadingMessages = [
   'Parsing document structure...',
@@ -685,6 +695,44 @@ document.getElementById('fileUpload').addEventListener('change', async (e) => {
     } catch { area.value = '⚠ Error reading PDF. Please paste text manually.'; }
   }
   e.target.value = '';
+});
+  
+  // 1. Функция входа
+async function signInWithGoogle() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+  if (error) alert("Error: " + error.message);
+}
+
+// 2. Функция выхода
+async function signOut() {
+  await supabase.auth.signOut();
+  window.location.reload();
+}
+
+// 3. Следим за пользователем (логин/лог-аут)
+supabase.auth.onAuthStateChange((event, session) => {
+  const authSection = document.getElementById('auth-section');
+  if (session) {
+    currentUser = session.user;
+    // Если вошел: показываем имя и маленькую кнопку выхода
+    authSection.innerHTML = `
+      <span style="font-size:13px; color:var(--ink-2); font-weight:600;">
+        Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}
+      </span>
+      <button onclick="signOut()" style="background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline;">
+        Log Out
+      </button>
+    `;
+  } else {
+    currentUser = null;
+    // Если вышел: возвращаем кнопку входа
+    authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
+  }
 });
 </script>
 </body>
