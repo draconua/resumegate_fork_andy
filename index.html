@@ -14,7 +14,6 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LE4CP86M9"></script>
@@ -595,16 +594,26 @@ function downloadPDF() {
 }
 
 async function downloadDOCX() {
+  const btn = event.target;
+  const originalText = btn.innerText;
+  
   try {
-    // Используем глобальный объект docx
-    const docxLib = window.docx;
-
-    if (!docxLib) {
-      alert("Библиотека DOCX не отвечает. Попробуй обновить страницу или использовать PDF.");
-      return;
+    // 1. Динамическая проверка и загрузка библиотеки, если её нет
+    if (!window.docx) {
+      btn.innerText = "Loading library...";
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
     }
 
-    // В версии 7.1.0 компоненты лежат прямо в объекте docx
+    const docxLib = window.docx;
+    btn.innerText = "Generating...";
+
+    // 2. Создание документа (логика для версии 7.1.0)
     const doc = new docxLib.Document({
       sections: [{
         children: lastRewrittenText.split('\n').map(line => 
@@ -615,6 +624,7 @@ async function downloadDOCX() {
       }]
     });
 
+    // 3. Упаковка и скачивание
     const blob = await docxLib.Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -624,9 +634,12 @@ async function downloadDOCX() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
   } catch (err) {
-    console.error("Ошибка DOCX:", err);
-    alert("Could not generate DOCX. Please use PDF for now.");
+    console.error("DOCX Critical Error:", err);
+    alert("Could not load Word library. Please use PDF or refresh the page.");
+  } finally {
+    btn.innerText = originalText;
   }
 }
 // File upload
