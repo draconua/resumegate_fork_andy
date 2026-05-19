@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LE4CP86M9"></script>
@@ -596,29 +596,26 @@ function downloadPDF() {
 
 async function downloadDOCX() {
   try {
-    // Пытаемся найти библиотеку под разными именами (window.docx или просто docx)
-    const docxLib = window.docx || (typeof docx !== 'undefined' ? docx : null);
+    // Используем глобальный объект docx
+    const docxLib = window.docx;
 
-    if (!docxLib || !docxLib.Document) {
-      console.error("Библиотека DOCX не найдена в window:", window.docx);
-      alert("The library is still loading. Please wait 3 seconds and try again. If it fails, use PDF.");
+    if (!docxLib) {
+      alert("Библиотека DOCX не отвечает. Попробуй обновить страницу или использовать PDF.");
       return;
     }
 
-    // Извлекаем нужные инструменты из библиотеки
-    const { Document, Packer, Paragraph, TextRun } = docxLib;
-    
-    const doc = new Document({
+    // В версии 7.1.0 компоненты лежат прямо в объекте docx
+    const doc = new docxLib.Document({
       sections: [{
         children: lastRewrittenText.split('\n').map(line => 
-          new Paragraph({
-            children: [new TextRun({ text: line, size: 24, font: "Arial" })]
+          new docxLib.Paragraph({
+            children: [new docxLib.TextRun({ text: line, size: 24, font: "Arial" })]
           })
         )
       }]
     });
 
-    const blob = await Packer.toBlob(doc);
+    const blob = await docxLib.Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -628,11 +625,10 @@ async function downloadDOCX() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch (err) {
-    console.error("DOCX Error:", err);
-    alert("Error generating DOCX. Please use PDF for now.");
+    console.error("Ошибка DOCX:", err);
+    alert("Could not generate DOCX. Please use PDF for now.");
   }
 }
-
 // File upload
 document.getElementById('fileUpload').addEventListener('change', async (e) => {
   const file = e.target.files[0];
