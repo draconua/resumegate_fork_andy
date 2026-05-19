@@ -593,54 +593,25 @@ function downloadPDF() {
   doc.save('ResumeGate_Improved.pdf');
 }
 
-async function downloadDOCX() {
-  const btn = event.target;
-  const originalText = btn.innerText;
+function downloadDOCX() {
+  // 1. Берем текст от нейросети и упаковываем его в HTML-код, который Word понимает
+  const source = '<html><head><meta charset="utf-8"></head><body>' + 
+                 lastRewrittenText.split('\n').map(line => `<p>${line}</p>`).join('') + 
+                 '</body></html>';
+
+  // 2. Создаем "виртуальный файл" в памяти браузера
+  const blob = new Blob(['\ufeff', source], { type: 'application/msword' });
+
+  // 3. А ВОТ ТУТ МЫ ИСПОЛЬЗУЕМ ТО, ЧТО ТЫ НАШЛА:
+  const url = URL.createObjectURL(blob); // Создаем временный адрес для этого файла
+  const a = document.createElement("a"); // Создаем тот самый тег <a> из твоего гугла
+  a.href = url;                          // Присваиваем ему адрес нашего текста
+  a.download = "ResumeGate_Improved.doc"; // Используем атрибут download, который ты нашла!
   
-  try {
-    // 1. Динамическая проверка и загрузка библиотеки, если её нет
-    if (!window.docx) {
-      btn.innerText = "Loading library...";
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    }
-
-    const docxLib = window.docx;
-    btn.innerText = "Generating...";
-
-    // 2. Создание документа (логика для версии 7.1.0)
-    const doc = new docxLib.Document({
-      sections: [{
-        children: lastRewrittenText.split('\n').map(line => 
-          new docxLib.Paragraph({
-            children: [new docxLib.TextRun({ text: line, size: 24, font: "Arial" })]
-          })
-        )
-      }]
-    });
-
-    // 3. Упаковка и скачивание
-    const blob = await docxLib.Packer.toBlob(doc);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ResumeGate_Improved.docx";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error("DOCX Critical Error:", err);
-    alert("Could not load Word library. Please use PDF or refresh the page.");
-  } finally {
-    btn.innerText = originalText;
-  }
+  // 4. Имитируем нажатие на эту ссылку, чтобы началась загрузка
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 // File upload
 document.getElementById('fileUpload').addEventListener('change', async (e) => {
