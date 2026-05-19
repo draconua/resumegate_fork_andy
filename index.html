@@ -594,13 +594,13 @@ function downloadPDF() {
   doc.save('ResumeGate_Improved.pdf');
 }
 
-async function downloadDOCX() {
+async function downloadDOCX() { // Убрали лишнюю "a"
   try {
-    // Пробуем найти библиотеку двумя способами
-    const docxLib = window.docx || (typeof docx !== 'undefined' ? docx : null);
+    // Правильное обращение к библиотеке docx
+    const docxLib = window.docx;
 
     if (!docxLib) {
-      alert("DOCX library is still not responding. Please try to refresh the page or use PDF.");
+      alert("DOCX library is still loading. Please try again in a moment.");
       return;
     }
 
