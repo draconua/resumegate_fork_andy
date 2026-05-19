@@ -740,6 +740,14 @@
         <span class="result-card-title">AI Recommendations</span>
       </div>
       <div class="reco-list" id="recoList"></div>
+      
+      <!-- IMPROVE BUTTON -->
+      <div style="padding: 20px; border-top: 1px solid var(--border); background: var(--paper-2); text-align: center;">
+         <p style="font-size: 13px; color: var(--ink-3); margin-bottom: 15px;">Want to fix all issues and rewrite your resume in 1-click?</p>
+         <button class="btn-analyze" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})" style="margin: 0 auto; background: var(--accent);">
+            ✨ Improve My Resume (Pro)
+         </button>
+      </div>
     </div>
 
     <!-- Re-analyze -->
@@ -754,7 +762,7 @@
 <section class="how-section" id="how">
   <div class="how-inner">
     <div class="section-label">The Process</div>
-    <h2 class="section-title" style="font-family:'Playfair Display',serif; font-size:36px; font-weight:700; letter-spacing:-0.5px; margin-bottom:48px;">How ResumeGate works</h2>
+    <h2 class="section-title">How ResumeGate works</h2>
     <div class="steps-grid">
       <div class="step">
         <div class="step-num">01</div>
@@ -789,7 +797,7 @@
         <li>ATS score + verdict</li>
         <li>Basic keyword check</li>
         <li class="no">Job description match</li>
-        <li class="no">Rewrite suggestions</li>
+        <li class="no">AI Resume Editor</li>
         <li class="no">PDF export</li>
       </ul>
       <button class="plan-btn" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">Get Started</button>
@@ -807,21 +815,21 @@
         <li>AI rewrite suggestions</li>
         <li>PDF export report</li>
       </ul>
-      <button class="plan-btn" onclick="alert('Stripe payment integration coming soon!')">Start Free Trial</button>
+      <button class="plan-btn" onclick="alert('Payments coming soon! Stay tuned.')">Start Free Trial</button>
     </div>
     <div class="plan">
-      <div class="plan-name">Teams</div>
-      <div class="plan-price"><sup>$</sup>29</div>
-      <div class="plan-period">per month · up to 10 users</div>
+      <div class="plan-name">AI Editor</div>
+      <div class="plan-price"><sup>$</sup>19</div>
+      <div class="plan-period">one-time or monthly</div>
       <ul class="plan-features">
         <li>Everything in Pro</li>
-        <li>Team dashboard</li>
-        <li>Bulk CV scanning</li>
-        <li>Custom ATS templates</li>
-        <li>Priority support</li>
-        <li>API access</li>
+        <li><strong>Live AI Resume Editor</strong></li>
+        <li>Smart Content Rewriting</li>
+        <li>ATS-optimized Templates</li>
+        <li>Priority AI Processing</li>
+        <li>Direct PDF Download</li>
       </ul>
-      <button class="plan-btn" onclick="window.location.href='mailto:theresumegate@gmail.com?subject=Teams Plan Inquiry'">Contact Sales</button>
+      <button class="plan-btn" onclick="alert('AI Editor is in development! Coming soon.')">Get Early Access</button>
     </div>
   </div>
 </section>
@@ -832,7 +840,7 @@
   <p style="font-size:12px;">
     <a href="privacy.html" style="color:inherit; text-decoration:none;">Privacy Policy</a> · 
     <a href="terms.html" style="color:inherit; text-decoration:none;">Terms of Service</a> · 
-    <a href="mailto:theresumegate@gmail.com" style="color:inherit; text-decoration:none;">Contact</a>
+    <a href="mailto:gateresume@gmail.com" style="color:inherit; text-decoration:none;">Contact</a>
   </p>
 </footer>
 
@@ -870,6 +878,15 @@ function reset() {
 }
 
 async function analyzeCV() {
+  // --- ЛОГИКА СЧЕТЧИКА СКАНОВ ---
+  let scans = parseInt(localStorage.getItem('rg_scans') || '0');
+  
+  if (scans >= 3) {
+      document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
+      alert("You've reached the free limit (3/3 scans). Please upgrade to Pro for unlimited scans and AI Editor!");
+      return;
+  }
+
   const cv = document.getElementById('cvText').value.trim();
   const job = document.getElementById('jobText').value.trim();
   const errEl = document.getElementById('errorMsg');
@@ -889,7 +906,6 @@ async function analyzeCV() {
   document.getElementById('loadingState').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   try {
-    // 🎯 Теперь мы отправляем чистые данные прямо на наш Vercel!
     const response = await fetch('https://resumegate.vercel.app/api/analyze', {
       method: 'POST',
       headers: {
@@ -912,6 +928,9 @@ async function analyzeCV() {
     const cleaned = raw.replace(/```json|```/g, '').trim();
     const result = JSON.parse(cleaned);
 
+    // Увеличиваем счетчик только при успешном анализе
+    localStorage.setItem('rg_scans', scans + 1);
+
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
     renderResults(result);
@@ -926,10 +945,8 @@ async function analyzeCV() {
 }
 
 function renderResults(r) {
-  // Score number
   document.getElementById('scoreNum').textContent = r.score;
 
-  // Arc animation
   const circumference = 2 * Math.PI * 62;
   const arc = document.getElementById('scoreArc');
   const color = r.score >= 75 ? '#2e7d52' : r.score >= 50 ? '#b5620e' : '#b52e2e';
@@ -942,7 +959,6 @@ function renderResults(r) {
   document.getElementById('scoreVerdict').textContent = r.verdict;
   document.getElementById('scoreSummary').textContent = r.summary;
 
-  // Sub scores
   const bars = document.getElementById('scoreBars');
   bars.innerHTML = '';
   const subs = r.subScores || {};
@@ -962,17 +978,14 @@ function renderResults(r) {
     });
   }, 200);
 
-  // Keywords found
   const kwFoundEl = document.getElementById('kwFound');
   kwFoundEl.innerHTML = (r.keywordsFound || []).map(k =>
     `<span class="kw-tag kw-found">${k}</span>`).join('');
 
-  // Keywords missing
   const kwMissingEl = document.getElementById('kwMissing');
   kwMissingEl.innerHTML = (r.keywordsMissing || []).map(k =>
     `<span class="kw-tag kw-missing">${k}</span>`).join('');
 
-  // Issues
   const issueEl = document.getElementById('issuesList');
   issueEl.innerHTML = (r.issues || []).map(iss => {
     const cls = iss.severity === 'critical' ? 'issue-critical' :
@@ -983,7 +996,6 @@ function renderResults(r) {
     </div>`;
   }).join('');
 
-  // Recommendations
   const recoEl = document.getElementById('recoList');
   recoEl.innerHTML = (r.recommendations || []).map((rec, i) => `
     <div class="reco-item">
@@ -996,15 +1008,14 @@ function renderResults(r) {
   document.getElementById('results').classList.add('visible');
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-// --- ОБРАБОТКА ЗАГРУЗКИ ФАЙЛОВ ---
+
 document.getElementById('fileUpload').addEventListener('change', async function(e) {
   const file = e.target.files[0];
   if (!file) return;
 
   const textArea = document.getElementById('cvText');
-  textArea.value = "Читаем файл... ⏳";
+  textArea.value = "Reading file... ⏳";
 
-  // Если это обычный текстовый файл
   if (file.name.toLowerCase().endsWith('.txt')) {
     textArea.value = await file.text();
   } 
@@ -1014,11 +1025,10 @@ document.getElementById('fileUpload').addEventListener('change', async function(
       const result = await mammoth.extractRawText({ arrayBuffer });
       textArea.value = result.value.trim();
     } catch (err) {
-      textArea.value = "⚠ Ошибка при чтении DOCX. Скопируйте текст вручную.";
+      textArea.value = "⚠ Error reading DOCX. Please paste text manually.";
       console.error(err);
     }
   }
-   // Если это PDF
   else if (file.name.toLowerCase().endsWith('.pdf')) {
     try {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
@@ -1029,26 +1039,19 @@ document.getElementById('fileUpload').addEventListener('change', async function(
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        
-        // Изначально склеиваем текст
         let pageText = textContent.items.map(item => item.str).join(' ');
-        
-        // 🛠 УМНАЯ ОЧИСТКА: чиним ссылки, дефисы и точки
-        pageText = pageText.replace(/([a-zA-Z0-9])\s+-\s+([a-zA-Z0-9])/g, '$1-$2'); // склеиваем дефисы (in/name - surname -> in/name-surname)
-        pageText = pageText.replace(/\s+\/\s+/g, '/'); // убираем пробелы вокруг слешей
-        pageText = pageText.replace(/\s+\.\s+/g, '.'); // убираем пробелы вокруг точек (. com -> .com)
-        pageText = pageText.replace(/\s{2,}/g, ' '); // удаляем двойные/тройные пробелы
-        
+        pageText = pageText.replace(/([a-zA-Z0-9])\s+-\s+([a-zA-Z0-9])/g, '$1-$2');
+        pageText = pageText.replace(/\s+\/\s+/g, '/');
+        pageText = pageText.replace(/\s+\.\s+/g, '.');
+        pageText = pageText.replace(/\s{2,}/g, ' ');
         fullText += pageText + "\n\n";
       }
       textArea.value = fullText;
     } catch (err) {
-      textArea.value = "⚠ Ошибка при чтении PDF. Файл может быть поврежден или защищен паролем. Пожалуйста, скопируйте текст вручную.";
+      textArea.value = "⚠ Error reading PDF. Please copy-paste manually.";
       console.error(err);
     }
   }
-  
-  // Сбрасываем поле, чтобы можно было выбрать тот же файл снова
   e.target.value = '';
 });
 </script>
