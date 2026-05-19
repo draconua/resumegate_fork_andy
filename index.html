@@ -483,7 +483,8 @@ let lastRewrittenText = '';
 // Настройка Supabase
 const supabaseUrl = 'https://zcbvqystbanooiczjqop.supabase.co';
 const supabaseKey = 'sb_publishable_Kq07S3DxE59y4pHNocwaUA_7M7I6-kL';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+// МЫ ПОМЕНЯЛИ ИМЯ ПЕРЕМЕННОЙ НА sb
+const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let currentUser = null;
 
@@ -697,9 +698,9 @@ document.getElementById('fileUpload').addEventListener('change', async (e) => {
   e.target.value = '';
 });
   
-  // 1. Функция входа
+// 1. Функция входа
 async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { data, error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin
@@ -710,16 +711,15 @@ async function signInWithGoogle() {
 
 // 2. Функция выхода
 async function signOut() {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   window.location.reload();
 }
 
-// 3. Следим за пользователем (логин/лог-аут)
-supabase.auth.onAuthStateChange((event, session) => {
+// 3. Следим за пользователем
+sb.auth.onAuthStateChange((event, session) => {
   const authSection = document.getElementById('auth-section');
   if (session) {
     currentUser = session.user;
-    // Если вошел: показываем имя и маленькую кнопку выхода
     authSection.innerHTML = `
       <span style="font-size:13px; color:var(--ink-2); font-weight:600;">
         Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}
@@ -730,7 +730,6 @@ supabase.auth.onAuthStateChange((event, session) => {
     `;
   } else {
     currentUser = null;
-    // Если вышел: возвращаем кнопку входа
     authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
   }
 });
