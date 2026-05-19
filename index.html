@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LE4CP86M9"></script>
@@ -595,18 +595,39 @@ function downloadPDF() {
 }
 
 async function downloadDOCX() {
-  const doc = new docx.Document({
-    sections: [{
-      children: lastRewrittenText.split('\n').map(line =>
-        new docx.Paragraph({ children: [new docx.TextRun({ text: line, size: 24, font: 'Arial' })] })
-      )
-    }]
-  });
-  const blob = await docx.Packer.toBlob(doc);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'ResumeGate_Improved.docx'; a.click();
-  URL.revokeObjectURL(url);
+  try {
+    // Проверяем, загрузилась ли библиотека
+    if (!window.docx) {
+      alert("DOCX library is still loading. Please wait a second.");
+      return;
+    }
+
+    // Достаем инструменты из глобального объекта библиотеки
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    
+    const doc = new Document({
+      sections: [{
+        children: lastRewrittenText.split('\n').map(line => 
+          new Paragraph({
+            children: [new TextRun({ text: line, size: 24, font: "Arial" })]
+          })
+        )
+      }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ResumeGate_Improved.docx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("DOCX Error:", err);
+    alert("Could not generate DOCX. Please use PDF for now.");
+  }
 }
 
 // File upload
