@@ -36,6 +36,15 @@
     --border: rgba(14,14,14,0.12);
     --shadow: 0 2px 12px rgba(14,14,14,0.08);
   }
+  /* Плавный скролл и отступы для якорей */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Чтобы при клике на меню заголовок не прятался под шапку */
+  #tool, #how, #pricing {
+    scroll-margin-top: 100px; 
+  }
 
   body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
 
