@@ -594,7 +594,7 @@ function downloadPDF() {
   doc.save('ResumeGate_Improved.pdf');
 }
 
-aasync function downloadDOCX() {
+async function downloadDOCX() {
   try {
     // Пробуем найти библиотеку двумя способами
     const docxLib = window.docx || (typeof docx !== 'undefined' ? docx : null);
