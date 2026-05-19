@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LE4CP86M9"></script>
@@ -594,16 +594,17 @@ function downloadPDF() {
   doc.save('ResumeGate_Improved.pdf');
 }
 
-async function downloadDOCX() {
+aasync function downloadDOCX() {
   try {
-    // Проверяем, загрузилась ли библиотека
-    if (!window.docx) {
-      alert("DOCX library is still loading. Please wait a second.");
+    // Пробуем найти библиотеку двумя способами
+    const docxLib = window.docx || (typeof docx !== 'undefined' ? docx : null);
+
+    if (!docxLib) {
+      alert("DOCX library is still not responding. Please try to refresh the page or use PDF.");
       return;
     }
 
-    // Достаем инструменты из глобального объекта библиотеки
-    const { Document, Packer, Paragraph, TextRun } = window.docx;
+    const { Document, Packer, Paragraph, TextRun } = docxLib;
     
     const doc = new Document({
       sections: [{
