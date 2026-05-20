@@ -52,11 +52,17 @@ Return ONLY JSON. No markdown.`;
     });
 
     const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
+    
+    // ПРОВЕРКА: Если Google выдал ошибку (перегрузка или лимиты)
+    if (data.error) {
+      throw new Error(`Gemini Error: ${data.error.message}`);
+    }
+
+    if (!data.candidates || !data.candidates[0]) {
+      throw new Error("Gemini returned empty response. Please try again in 1 minute.");
+    }
     
     const rawOutput = data.candidates[0].content.parts[0].text.trim();
-    
-    // Возвращаем результат в формате для фронтенда
     res.status(200).json({ choices: [{ message: { content: rawOutput } }] });
     
   } catch (error) {
