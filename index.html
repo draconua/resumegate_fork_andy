@@ -611,6 +611,7 @@ async function analyzeCV() {
     }
     errEl.classList.add('active');
   }
+} // ВОТ ЭТОЙ СКОБКИ У ТЕБЯ НЕТ! Она закрывает саму функцию analyzeCV
   
 function renderResults(r) {
   document.getElementById('scoreNum').textContent = r.score;
