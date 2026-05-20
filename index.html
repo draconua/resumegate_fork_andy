@@ -525,43 +525,30 @@ function reset() {
 }
 
 async function analyzeCV() {
-  // 1. Проверяем Pro-статус в базе данных
   let isPro = false;
   if (currentUser) {
-    const { data } = await sb
-      .from('profiles')
-      .select('is_pro')
-      .eq('id', currentUser.id)
-      .maybeSingle();
-    
-    if (data && data.is_pro) {
-      isPro = true;
-    }
+    const { data } = await sb.from('profiles').select('is_pro').eq('id', currentUser.id).maybeSingle();
+    if (data && data.is_pro) isPro = true;
   }
 
-  // 2. Работаем со счетчиком сканов (только для не-Pro)
   let currentScans = parseInt(localStorage.getItem('rg_scans') || '0');
-  if (!isPro) {
-    if (currentScans >= 3) {
-      document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-      alert("You've used all 3 free scans this month. Upgrade to Pro for unlimited scans!");
-      return;
-    }
+  if (!isPro && currentScans >= 3) {
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+    alert("You've used all 3 free scans this month. Upgrade to Pro for unlimited scans!");
+    return;
   }
 
-  // 3. Собираем и валидируем данные из полей
   const cv = document.getElementById('cvText').value.trim();
   const job = document.getElementById('jobText').value.trim();
   const errEl = document.getElementById('errorMsg');
   errEl.classList.remove('active');
 
   if (!cv || cv.length < 100) {
-    errEl.textContent = '⚠ Please paste your CV text (at least a few sentences) before analyzing.';
+    errEl.textContent = '⚠ Please paste your CV text (at least 100 characters) before analyzing.';
     errEl.classList.add('active');
     return;
   }
 
-  // 4. Включаем лоадер и готовим экран
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('results').classList.remove('visible');
   document.getElementById('rewriteBox').classList.remove('active');
@@ -569,7 +556,6 @@ async function analyzeCV() {
   startLoading();
   document.getElementById('loadingState').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  // 5. ОТПРАВЛЯЕМ ЗАПРОС (Теперь внутри try...catch для безопасности)
   try {
     const response = await fetch('https://resumegate.vercel.app/api/analyze', {
       method: 'POST',
@@ -580,16 +566,11 @@ async function analyzeCV() {
     if (!response.ok) throw new Error('Server error');
 
     const data = await response.json();
-    
-    // Вытаскиваем JSON из ответа Gemini
     const raw = (data.choices?.[0]?.message?.content || '').replace(/```json|```/g, '').trim();
     const result = JSON.parse(raw);
 
-    // ВАЖНО: Сохраняем результаты анализа в глобальную переменную
-    // Она понадобится функции showRewrite() для контекста
     currentAnalysisResults = result; 
 
-    // Увеличиваем счетчик сканов только обычным пользователям
     if (!isPro) {
       localStorage.setItem('rg_scans', currentScans + 1);
     }
@@ -603,15 +584,14 @@ async function analyzeCV() {
     document.getElementById('loadingState').classList.remove('active');
     document.getElementById('analyzeBtn').disabled = false;
     
-    // ПРОВЕРКА НА ЛИМИТЫ GOOGLE
     if (e.message.toLowerCase().includes('quota') || e.message.includes('429')) {
-      errEl.textContent = '⚠ AI is a bit busy right now (limit reached). Please wait 30 seconds and try again.';
+      errEl.textContent = '⚠ AI is a bit busy right now. Please wait 30 seconds and try again.';
     } else {
       errEl.textContent = '⚠ Something went wrong: ' + e.message;
     }
     errEl.classList.add('active');
   }
-} // ВОТ ЭТОЙ СКОБКИ У ТЕБЯ НЕТ! Она закрывает саму функцию analyzeCV
+} // ВОТ ТУТ ДОЛЖНО БЫТЬ ДВЕ СКОБКИ!
   
 function renderResults(r) {
   document.getElementById('scoreNum').textContent = r.score;
