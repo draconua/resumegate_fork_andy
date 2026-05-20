@@ -516,6 +516,11 @@ function reset() {
   document.getElementById('loadingState').classList.remove('active');
   document.getElementById('errorMsg').classList.remove('active');
   document.getElementById('analyzeBtn').disabled = false;
+    
+  // ОБНУЛЯЕМ РЕЗУЛЬТАТЫ, чтобы для нового резюме кнопка снова требовала анализ
+  currentAnalysisResults = null; 
+  lastRewrittenText = '';
+  
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -657,7 +662,7 @@ function renderResults(r) {
 }
 
 async function showRewrite() {
-  if (!lastRewrittenText) {
+  if (!currentAnalysisResults) {
     alert('Please analyze your CV first!');
     return;
   }
