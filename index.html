@@ -602,10 +602,15 @@ async function analyzeCV() {
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
     document.getElementById('analyzeBtn').disabled = false;
-    errEl.textContent = '⚠ Something went wrong: ' + e.message + '. Please try again.';
+    
+    // ПРОВЕРКА НА ЛИМИТЫ GOOGLE
+    if (e.message.toLowerCase().includes('quota') || e.message.includes('429')) {
+      errEl.textContent = '⚠ AI is a bit busy right now (limit reached). Please wait 30 seconds and try again.';
+    } else {
+      errEl.textContent = '⚠ Something went wrong: ' + e.message;
+    }
     errEl.classList.add('active');
   }
-}
   
 function renderResults(r) {
   document.getElementById('scoreNum').textContent = r.score;
@@ -662,42 +667,69 @@ function renderResults(r) {
 }
 
 async function showRewrite() {
-  const btn = document.getElementById('rewrite-btn');
+  // Находим кнопку рерайта, чтобы менять на ней текст
+  const btn = document.getElementById('rewrite-btn') || document.querySelector('.reco-full .btn-analyze');
 
-  // 1. Проверка: был ли сделан анализ
   if (!currentAnalysisResults) {
     alert('Please analyze your CV first!');
     return;
   }
 
-  // 2. Проверка: залогинен ли пользователь
   if (!currentUser) {
     alert('Please Sign In with Google to access Pro features.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  // Меняем текст на кнопке, чтобы пользователь видел процесс
+  // Блокируем кнопку и показываем статус
   const originalText = btn.innerHTML;
   btn.innerHTML = `⏳ AI is rewriting (takes ~10s)...`;
   btn.disabled = true;
 
   try {
-    // Получаем токен для проверки на бэкенде
     const { data: sessionData } = await sb.auth.getSession();
     const token = sessionData.session?.access_token;
 
-    // 3. ЗАПРОС К ИИ ЗА ТЕКСТОМ РЕРАЙТА
-    const response = await fetch('/api/rewrite', {
+    // ДЕЛАЕМ ЗАПРОС К НОВОМУ API
+    const response = await fetch('https://resumegate.vercel.app/api/rewrite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cvText: document.getElementById('cvText').value,
         jobText: document.getElementById('jobText').value,
         analysisResults: currentAnalysisResults, // Передаем контекст ошибок
-        token: token // Передаем паспорт пользователя
+        token: token
       })
     });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Сохраняем полученный текст и вставляем его в поле
+      lastRewrittenText = data.rewrittenResume;
+      document.getElementById('rewrittenContent').textContent = lastRewrittenText;
+      
+      // Показываем блок
+      document.getElementById('rewriteBox').classList.add('active');
+      document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Если не Pro (ошибка 403)
+      if (response.status === 403) {
+        alert('This is a Pro feature. Please upgrade your plan!');
+        document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('AI Error: ' + (data.error || 'The model is busy, try again.'));
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Connection error. Please try again.');
+  } finally {
+    // Возвращаем кнопку в исходное состояние
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
 
     const data = await response.json();
 
