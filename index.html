@@ -627,13 +627,44 @@ function renderResults(r) {
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function showRewrite() {
+async function showRewrite() {
+  // 1. Сначала проверяем, есть ли вообще текст для показа
   if (!lastRewrittenText) {
     alert('Please analyze your CV first!');
     return;
   }
-  document.getElementById('rewriteBox').classList.add('active');
-  document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
+
+  // 2. Проверяем, вошел ли пользователь в аккаунт
+  if (!currentUser) {
+    alert('Please Sign In with Google to access Pro features.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // 3. Спрашиваем у Supabase статус пользователя
+  // Используем "sb", так как мы переименовали переменную ранее
+  const { data, error } = await sb
+    .from('profiles')
+    .select('is_pro')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (error) {
+    console.error("Error checking status:", error);
+    alert("Connection error. Please try again.");
+    return;
+  }
+
+  // 4. Если статус Pro — открываем блок с текстом
+  if (data && data.is_pro === true) {
+    document.getElementById('rewriteBox').classList.add('active');
+    document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
+  } 
+  // 5. Если не Pro — отправляем к ценам
+  else {
+    alert('This is a Pro feature. Please upgrade your plan to unlock the AI Rewrite.');
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 function downloadPDF() {
