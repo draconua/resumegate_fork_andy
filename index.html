@@ -533,19 +533,20 @@ async function analyzeCV() {
     }
   }
 
-  // 2. Проверяем лимиты ТОЛЬКО если пользователь НЕ Pro
+  // 2. Работаем со счетчиком сканов
+  let currentScans = parseInt(localStorage.getItem('rg_scans') || '0');
+
+  // Если пользователь НЕ Pro — проверяем лимит
   if (!isPro) {
-    const scans = parseInt(localStorage.getItem('rg_scans') || '0');
-    if (scans >= 3) {
+    if (currentScans >= 3) {
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
       alert("You've used all 3 free scans this month. Upgrade to Pro for unlimited scans!");
       return;
     }
   }
 
-  // ... дальше идет твой обычный код анализа (cvText, jobText и т.д.)
+  // 3. Собираем данные из полей
   const cv = document.getElementById('cvText').value.trim();
-  // ... и так далее
   const job = document.getElementById('jobText').value.trim();
   const errEl = document.getElementById('errorMsg');
   errEl.classList.remove('active');
@@ -556,6 +557,7 @@ async function analyzeCV() {
     return;
   }
 
+  // 4. Визуальный запуск анализа
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('results').classList.remove('visible');
   document.getElementById('rewriteBox').classList.remove('active');
@@ -576,7 +578,11 @@ async function analyzeCV() {
     const raw = (data.choices?.[0]?.message?.content || '').replace(/```json|```/g, '').trim();
     const result = JSON.parse(raw);
 
-    localStorage.setItem('rg_scans', scans + 1);
+    // 5. Увеличиваем счетчик ТОЛЬКО для обычных пользователей
+    if (!isPro) {
+      localStorage.setItem('rg_scans', currentScans + 1);
+    }
+    
     lastRewrittenText = result.rewrittenResume || '';
 
     stopLoading();
