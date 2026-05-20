@@ -480,6 +480,7 @@
 <script>
 const LEMON_URL = 'https://theresumegate.lemonsqueezy.com/checkout/buy/2cc21afc-e128-4293-b2d0-4af55db2df4f';
 let lastRewrittenText = '';
+let currentAnalysisResults = null; // Добавь это: здесь мы будем хранить данные анализа
 // Настройка Supabase
 const supabaseUrl = 'https://zcbvqystbanooiczjqop.supabase.co';
 const supabaseKey = 'sb_publishable_Kq07S3DxE59y4pHNocwaUA_7M7I6-kL';
@@ -519,7 +520,7 @@ function reset() {
 }
 
 async function analyzeCV() {
-  // 1. Сначала проверяем: если пользователь залогинен, какой у него статус?
+  // 1. Проверяем Pro-статус в базе данных
   let isPro = false;
   if (currentUser) {
     const { data } = await sb
@@ -533,10 +534,8 @@ async function analyzeCV() {
     }
   }
 
-  // 2. Работаем со счетчиком сканов
+  // 2. Работаем со счетчиком сканов (только для не-Pro)
   let currentScans = parseInt(localStorage.getItem('rg_scans') || '0');
-
-  // Если пользователь НЕ Pro — проверяем лимит
   if (!isPro) {
     if (currentScans >= 3) {
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
@@ -545,7 +544,7 @@ async function analyzeCV() {
     }
   }
 
-  // 3. Собираем данные из полей
+  // 3. Собираем и валидируем данные из полей
   const cv = document.getElementById('cvText').value.trim();
   const job = document.getElementById('jobText').value.trim();
   const errEl = document.getElementById('errorMsg');
@@ -557,7 +556,7 @@ async function analyzeCV() {
     return;
   }
 
-  // 4. Визуальный запуск анализа
+  // 4. Включаем лоадер и готовим экран
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('results').classList.remove('visible');
   document.getElementById('rewriteBox').classList.remove('active');
@@ -565,6 +564,7 @@ async function analyzeCV() {
   startLoading();
   document.getElementById('loadingState').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+  // 5. ОТПРАВЛЯЕМ ЗАПРОС (Теперь внутри try...catch для безопасности)
   try {
     const response = await fetch('https://resumegate.vercel.app/api/analyze', {
       method: 'POST',
@@ -575,16 +575,20 @@ async function analyzeCV() {
     if (!response.ok) throw new Error('Server error');
 
     const data = await response.json();
+    
+    // Вытаскиваем JSON из ответа Gemini
     const raw = (data.choices?.[0]?.message?.content || '').replace(/```json|```/g, '').trim();
     const result = JSON.parse(raw);
 
-    // 5. Увеличиваем счетчик ТОЛЬКО для обычных пользователей
+    // ВАЖНО: Сохраняем результаты анализа в глобальную переменную
+    // Она понадобится функции showRewrite() для контекста
+    currentAnalysisResults = result; 
+
+    // Увеличиваем счетчик сканов только обычным пользователям
     if (!isPro) {
       localStorage.setItem('rg_scans', currentScans + 1);
     }
     
-    lastRewrittenText = result.rewrittenResume || '';
-
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
     renderResults(result);
@@ -597,7 +601,7 @@ async function analyzeCV() {
     errEl.classList.add('active');
   }
 }
-
+  
 function renderResults(r) {
   document.getElementById('scoreNum').textContent = r.score;
 
