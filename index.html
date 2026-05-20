@@ -628,41 +628,43 @@ function renderResults(r) {
 }
 
 async function showRewrite() {
-  // 1. Сначала проверяем, есть ли вообще текст для показа
   if (!lastRewrittenText) {
     alert('Please analyze your CV first!');
     return;
   }
 
-  // 2. Проверяем, вошел ли пользователь в аккаунт
   if (!currentUser) {
     alert('Please Sign In with Google to access Pro features.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  // 3. Спрашиваем у Supabase статус пользователя
-  // Используем "sb", так как мы переименовали переменную ранее
-  const { data, error } = await sb
+  // Запрашиваем статус
+  let { data, error } = await sb
     .from('profiles')
     .select('is_pro')
     .eq('id', currentUser.id)
-    .single();
+    .maybeSingle(); // Используем maybeSingle вместо single, чтобы не было ошибки, если строки нет
 
-  if (error) {
-    console.error("Error checking status:", error);
-    alert("Connection error. Please try again.");
+  // Если вдруг профиля всё еще нет (редкий случай)
+  if (!data) {
+    console.log("Profile not found, user is not Pro.");
+    alert('This is a Pro feature. Please upgrade your plan!');
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
-  // 4. Если статус Pro — открываем блок с текстом
-  if (data && data.is_pro === true) {
+  if (error) {
+    console.error("Supabase Error:", error);
+    alert("Something went wrong. Please refresh the page.");
+    return;
+  }
+
+  if (data.is_pro === true) {
     document.getElementById('rewriteBox').classList.add('active');
     document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
-  } 
-  // 5. Если не Pro — отправляем к ценам
-  else {
-    alert('This is a Pro feature. Please upgrade your plan to unlock the AI Rewrite.');
+  } else {
+    alert('This is a Pro feature. Please upgrade your plan to unlock AI Rewrite!');
     document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
   }
 }
