@@ -377,8 +377,8 @@
       <div class="reco-list" id="recoList"></div>
       <div style="padding:20px 28px; border-top:1px solid var(--border); background:var(--paper-2); text-align:center;">
         <p style="font-size:13px; color:var(--ink-3); margin-bottom:14px;">Want your full ATS-optimized resume rewritten by AI?</p>
-        <button class="btn-analyze" style="margin:0 auto; background:var(--accent);" onclick="showRewrite()">
-          ✨ Show My Rewritten Resume (Pro)
+        <button id="rewrite-btn" class="btn-analyze" style="margin:0 auto; background:var(--accent);" onclick="showRewrite()">
+          ✨ Rewrite My Resume (Pro)
         </button>
       </div>
     </div>
@@ -662,44 +662,67 @@ function renderResults(r) {
 }
 
 async function showRewrite() {
+  const btn = document.getElementById('rewrite-btn');
+
+  // 1. Проверка: был ли сделан анализ
   if (!currentAnalysisResults) {
     alert('Please analyze your CV first!');
     return;
   }
 
+  // 2. Проверка: залогинен ли пользователь
   if (!currentUser) {
     alert('Please Sign In with Google to access Pro features.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  // Запрашиваем статус
-  let { data, error } = await sb
-    .from('profiles')
-    .select('is_pro')
-    .eq('id', currentUser.id)
-    .maybeSingle(); // Используем maybeSingle вместо single, чтобы не было ошибки, если строки нет
+  // Меняем текст на кнопке, чтобы пользователь видел процесс
+  const originalText = btn.innerHTML;
+  btn.innerHTML = `⏳ AI is rewriting (takes ~10s)...`;
+  btn.disabled = true;
 
-  // Если вдруг профиля всё еще нет (редкий случай)
-  if (!data) {
-    console.log("Profile not found, user is not Pro.");
-    alert('This is a Pro feature. Please upgrade your plan!');
-    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
+  try {
+    // Получаем токен для проверки на бэкенде
+    const { data: sessionData } = await sb.auth.getSession();
+    const token = sessionData.session?.access_token;
 
-  if (error) {
-    console.error("Supabase Error:", error);
-    alert("Something went wrong. Please refresh the page.");
-    return;
-  }
+    // 3. ЗАПРОС К ИИ ЗА ТЕКСТОМ РЕРАЙТА
+    const response = await fetch('/api/rewrite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cvText: document.getElementById('cvText').value,
+        jobText: document.getElementById('jobText').value,
+        analysisResults: currentAnalysisResults, // Передаем контекст ошибок
+        token: token // Передаем паспорт пользователя
+      })
+    });
 
-  if (data.is_pro === true) {
-    document.getElementById('rewriteBox').classList.add('active');
-    document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
-  } else {
-    alert('This is a Pro feature. Please upgrade your plan to unlock AI Rewrite!');
-    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+    const data = await response.json();
+
+    if (response.ok) {
+      // 4. Если всё успешно, сохраняем текст и показываем блок
+      lastRewrittenText = data.rewrittenResume;
+      document.getElementById('rewrittenContent').textContent = lastRewrittenText;
+      document.getElementById('rewriteBox').classList.add('active');
+      document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Если не Pro или другая ошибка
+      if (response.status === 403) {
+        alert('This is a Pro feature. Please upgrade your plan!');
+        document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Error: ' + (data.error || 'Failed to rewrite resume'));
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Connection error. Please try again.');
+  } finally {
+    // Возвращаем кнопку в нормальное состояние
+    btn.innerHTML = originalText;
+    btn.disabled = false;
   }
 }
 
