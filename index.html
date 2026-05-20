@@ -648,21 +648,18 @@ function renderResults(r) {
 }
 
 async function showRewrite() {
-  // Находим кнопку рерайта, чтобы менять на ней текст
   const btn = document.getElementById('rewrite-btn') || document.querySelector('.reco-full .btn-analyze');
-
+  
   if (!currentAnalysisResults) {
     alert('Please analyze your CV first!');
     return;
   }
 
   if (!currentUser) {
-    alert('Please Sign In with Google to access Pro features.');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert('Please Sign In with Google first!');
     return;
   }
 
-  // Блокируем кнопку и показываем статус
   const originalText = btn.innerHTML;
   btn.innerHTML = `⏳ AI is rewriting (takes ~10s)...`;
   btn.disabled = true;
@@ -671,17 +668,34 @@ async function showRewrite() {
     const { data: sessionData } = await sb.auth.getSession();
     const token = sessionData.session?.access_token;
 
-    // ДЕЛАЕМ ЗАПРОС К НОВОМУ API
     const response = await fetch('https://resumegate.vercel.app/api/rewrite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cvText: document.getElementById('cvText').value,
         jobText: document.getElementById('jobText').value,
-        analysisResults: currentAnalysisResults, // Передаем контекст ошибок
+        analysisResults: currentAnalysisResults,
         token: token
       })
     });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      lastRewrittenText = data.rewrittenResume;
+      document.getElementById('rewrittenContent').textContent = lastRewrittenText;
+      document.getElementById('rewriteBox').classList.add('active');
+      document.getElementById('rewriteBox').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      alert("API Error: " + (data.error || "Unknown error"));
+    }
+  } catch (e) {
+    alert('Connection error. Please try again.');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
 
     const data = await response.json();
 
