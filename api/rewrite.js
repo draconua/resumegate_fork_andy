@@ -47,11 +47,15 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    // ПРОВЕРКА: Если Google выдал ошибку
+    if (data.error) {
+       return res.status(500).json({ error: `AI is overloaded: ${data.error.message}` });
+    }
+
+    if (!data.candidates || !data.candidates[0]) {
+       return res.status(500).json({ error: "AI returned empty response. Try again." });
+    }
+
     const rewrittenText = data.candidates[0].content.parts[0].text.trim();
-
     res.status(200).json({ rewrittenResume: rewrittenText });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
