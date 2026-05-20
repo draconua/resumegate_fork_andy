@@ -519,14 +519,33 @@ function reset() {
 }
 
 async function analyzeCV() {
-  const scans = parseInt(localStorage.getItem('rg_scans') || '0');
-  if (scans >= 3) {
-    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-    alert("You've used all 3 free scans this month. Upgrade to Pro for unlimited scans!");
-    return;
+  // 1. Сначала проверяем: если пользователь залогинен, какой у него статус?
+  let isPro = false;
+  if (currentUser) {
+    const { data } = await sb
+      .from('profiles')
+      .select('is_pro')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    
+    if (data && data.is_pro) {
+      isPro = true;
+    }
   }
 
+  // 2. Проверяем лимиты ТОЛЬКО если пользователь НЕ Pro
+  if (!isPro) {
+    const scans = parseInt(localStorage.getItem('rg_scans') || '0');
+    if (scans >= 3) {
+      document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+      alert("You've used all 3 free scans this month. Upgrade to Pro for unlimited scans!");
+      return;
+    }
+  }
+
+  // ... дальше идет твой обычный код анализа (cvText, jobText и т.д.)
   const cv = document.getElementById('cvText').value.trim();
+  // ... и так далее
   const job = document.getElementById('jobText').value.trim();
   const errEl = document.getElementById('errorMsg');
   errEl.classList.remove('active');
