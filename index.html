@@ -49,19 +49,57 @@
 
   body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
 
-  /* NAV */
-  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; border-bottom: 1px solid var(--border); background: var(--paper); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+/* NAV — Обновленный для симметрии */
+  nav { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 48px; 
+    border-bottom: 1px solid var(--border); 
+    background: var(--paper); 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+    backdrop-filter: blur(8px);
+    height: 80px; /* Фиксируем высоту, чтобы ничего не дергалось */
+  }
   .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
   .logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 32px; }
-  .nav-links a { font-size: 14px; color: var(--ink-3); text-decoration: none; font-weight: 500; transition: color .2s; }
-  .nav-links a:hover { color: var(--ink); }
   .nav-links { 
     display: flex; 
     gap: 32px; 
-    /* Добавь это, чтобы зафиксировать ширину области ссылок, если хочешь идеала */
-    min-width: 300px; 
-    justify-content: center;
+    white-space: nowrap;
+  }
+  .nav-links a { 
+    font-size: 14px; 
+    color: var(--ink-3); 
+    text-decoration: none; 
+    font-weight: 500; 
+    transition: color .2s; 
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* МАГИЯ СИММЕТРИИ: Левая и правая части занимают одинаковое место */
+  .nav-left, #auth-section {
+    flex: 1; 
+    display: flex;
+    align-items: center;
+  }
+  .nav-left { justify-content: flex-start; }
+  #auth-section { justify-content: flex-end; }
+
+  /* Стиль для плашки PRO */
+  .pro-tag {
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(200, 96, 42, 0.3);
   }
   .nav-cta { background: var(--ink); color: var(--paper); padding: 9px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background .2s; }
   .nav-cta:hover { background: var(--ink-2); }
@@ -303,15 +341,18 @@
 <body>
 
 <nav>
-  <div class="logo">Resume<span>Gate</span></div>
+  <div class="nav-left">
+    <div class="logo">Resume<span>Gate</span></div>
+  </div>
+
   <div class="nav-links">
     <a href="#tool">Checker</a>
     <a href="#how">How it works</a>
     <a href="#pricing" id="nav-pricing">Pricing</a>
   </div>
-  <!-- Добавили min-width и фиксированное выравнивание, чтобы навигация не съезжала -->
+
   <div id="auth-section" style="display: flex; align-items: center; gap: 12px; min-width: 200px; justify-content: flex-end;">
-    <!-- Пусто, но место зарезервировано -->
+    <!-- Сюда JavaScript вставит всё остальное -->
   </div>
 </nav>
 
