@@ -132,7 +132,14 @@
   textarea::placeholder { color: var(--ink-4); font-style: italic; }
 
   /* ANALYZE BUTTON */
-  .analyze-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 40px; }
+  .analyze-row { 
+    display: flex; 
+    flex-direction: column; /* Складываем элементы друг под друга */
+    align-items: center;    /* Центрируем по горизонтали */
+    justify-content: center; 
+    gap: 12px;              /* Расстояние между кнопкой и текстом */
+    margin-bottom: 40px; 
+  }
   .btn-analyze { background: var(--ink); color: white; border: none; padding: 16px 40px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 10px; }
   .btn-analyze:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,96,42,0.35); }
   .btn-analyze:disabled { background: var(--ink-4); cursor: not-allowed; transform: none; box-shadow: none; }
