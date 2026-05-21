@@ -571,14 +571,14 @@ async function analyzeCV() {
       body: JSON.stringify({ 
         cvText: cv, 
         jobText: job,
-        token: token // Сервер сам проверит лимиты по этому токену или по IP
+        token: token 
       })
     });
 
-    const result = await response.json();
+    const data = await response.json(); // Теперь получаем объект { content: "..." } или { error: "..." }
 
     // 6. ПРОВЕРКА ЛИМИТА ОТ СЕРВЕРА
-    if (response.status === 403 && result.error === "LIMIT_EXCEEDED") {
+    if (response.status === 403 && data.error === "LIMIT_EXCEEDED") {
       stopLoading();
       document.getElementById('loadingState').classList.remove('active');
       document.getElementById('analyzeBtn').disabled = false;
@@ -588,21 +588,28 @@ async function analyzeCV() {
       return;
     }
 
-    if (!response.ok) throw new Error(result.error || 'Server error');
+    // Если сервер вернул ошибку Gemini или базы
+    if (!response.ok || data.error) throw new Error(data.error || 'Server error');
 
-    // Успех: сохраняем результаты
+    // --- РАСПАКОВКА РЕЗУЛЬТАТОВ ---
+    // Сервер прислал JSON внутри строки content, превращаем её в объект
+    const result = JSON.parse(data.content); 
+    
+    // Сохраняем результаты для рерайта
     currentAnalysisResults = result; 
     
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
-    renderResults(result);
+    renderResults(result); // Передаем объект с баллами в функцию отрисовки
 
   } catch (e) {
     stopLoading();
     document.getElementById('loadingState').classList.remove('active');
     document.getElementById('analyzeBtn').disabled = false;
+    // Выводим более понятную ошибку
     errEl.textContent = '⚠ ' + e.message;
     errEl.classList.add('active');
+    console.error("Full error:", e);
   }
 }
   
