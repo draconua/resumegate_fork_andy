@@ -279,7 +279,7 @@
     pointer-events: auto; /* А на само уведомление можно нажать */
     
     /* Анимация появления и исчезновения */
-    animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+    animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 3.7s forwards;
   }
 
   @keyframes slideIn {
@@ -790,7 +790,7 @@ function showNotice(message) {
   // 4. Удаляем уведомление через 3 секунды (когда закончится анимация)
   setTimeout(() => {
     toast.remove();
-  }, 3000);
+  }, 4000);
 }
 
 function downloadPDF() {
