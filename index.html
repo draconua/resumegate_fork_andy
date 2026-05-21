@@ -302,7 +302,9 @@
     <a href="#how">How it works</a>
     <a href="#pricing" id="nav-pricing">Pricing</a>
   </div>
-  <div id="auth-section" style="display: flex; align-items: center; gap: 12px;">
+  <!-- Добавили min-width и фиксированное выравнивание, чтобы навигация не съезжала -->
+  <div id="auth-section" style="display: flex; align-items: center; gap: 12px; min-width: 200px; justify-content: flex-end;">
+    <!-- Пусто, но место зарезервировано -->
   </div>
 </nav>
 
@@ -963,61 +965,67 @@ async function signOut() {
 }
 
 // 3. Следим за пользователем
-sb.auth.onAuthStateChange(async (event, session) => {
-  console.log("Auth Event:", event); // Это поможет нам увидеть, что происходит в консоли
-
+// Единая функция для обновления внешнего вида сайта в зависимости от логина и PRO
+async function updateUI(session) {
   const authSection = document.getElementById('auth-section');
   const pricingSection = document.getElementById('pricing');
   const pricingLink = document.getElementById('nav-pricing');
 
-  if (session) {
+  if (session && session.user) {
     currentUser = session.user;
-    
-    try {
-      // 1. Проверяем Pro-статус
-      const { data: profile, error } = await sb
-        .from('profiles')
-        .select('is_pro')
-        .eq('id', currentUser.id)
-        .maybeSingle();
 
-      if (error) throw error;
-      const isPro = profile?.is_pro || false;
+    // 1. Проверяем Pro-статус в базе
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('is_pro')
+      .eq('id', currentUser.id)
+      .maybeSingle();
 
-      // 2. Скрываем/Показываем Pricing
-      if (isPro) {
-        if (pricingSection) pricingSection.style.display = 'none';
-        if (pricingLink) pricingLink.style.display = 'none';
-      } else {
-        if (pricingSection) pricingSection.style.display = 'block';
-        if (pricingLink) pricingLink.style.display = 'block';
-      }
+    const isPro = profile?.is_pro || false;
 
-      // 3. Рисуем меню пользователя (Hi, Name)
-      authSection.innerHTML = '';
-      const nameSpan = document.createElement('span');
-      nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
-      nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
-
-      const logoutBtn = document.createElement('button');
-      logoutBtn.onclick = signOut;
-      logoutBtn.style.cssText = 'background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline; margin-left:10px;';
-      logoutBtn.textContent = 'Log Out';
-
-      authSection.append(nameSpan, logoutBtn);
-
-    } catch (e) {
-      console.error("Error in auth flow:", e);
+    // 2. Скрываем/Показываем блоки
+    if (isPro) {
+      if (pricingSection) pricingSection.style.display = 'none';
+      if (pricingLink) pricingLink.style.display = 'none';
+    } else {
+      if (pricingSection) pricingSection.style.display = 'block';
+      if (pricingLink) pricingLink.style.display = 'block';
     }
 
+    // 3. Рисуем меню пользователя
+    authSection.innerHTML = '';
+    const nameSpan = document.createElement('span');
+    nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
+    nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.onclick = signOut;
+    logoutBtn.style.cssText = 'background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline; margin-left:10px;';
+    logoutBtn.textContent = 'Log Out';
+
+    authSection.append(nameSpan, logoutBtn);
+
   } else {
-    // Если сессии действительно нет (событие SIGN_OUT или сессия истекла)
+    // Если пользователь НЕ залогинен
     currentUser = null;
     if (pricingSection) pricingSection.style.display = 'block';
     if (pricingLink) pricingLink.style.display = 'block';
     authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
   }
+}
+
+// Слушатель событий авторизации
+sb.auth.onAuthStateChange((event, session) => {
+  console.log("Auth event:", event);
+  updateUI(session);
 });
+
+// Мгновенная проверка при самой загрузке (чтобы не ждать события)
+async function initSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  updateUI(session);
+}
+initSession();
 </script>
 </body>
 </html>
