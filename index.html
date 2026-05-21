@@ -96,7 +96,8 @@
     font-weight: 800;
     padding: 2px 6px;
     border-radius: 4px;
-    margin-left: 8px;
+    margin-left: 0px;
+    margin-right: 8px;   /* Добавляем отступ справа, чтобы отодвинуть имя */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 2px 8px rgba(200, 96, 42, 0.3);
@@ -1054,26 +1055,26 @@ async function updateUI(session) {
       }
     }
 
-   // 3. Рисуем меню пользователя (имя + PRO + выход)
+   // 3. Рисуем меню пользователя (PRO + имя + выход)
     authSection.innerHTML = '';
     
     const userWrapper = document.createElement('div');
     userWrapper.style.display = 'flex';
     userWrapper.style.alignItems = 'center';
 
-    const nameSpan = document.createElement('span');
-    nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
-    nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
-    
-    userWrapper.appendChild(nameSpan);
-
-    // ЕСЛИ ПОЛЬЗОВАТЕЛЬ PRO — ДОБАВЛЯЕМ ПЛАШКУ
+    // СНАЧАЛА СОЗДАЕМ ПЛАШКУ PRO (если пользователь PRO)
     if (isPro) {
       const proTag = document.createElement('span');
       proTag.className = 'pro-tag';
       proTag.textContent = 'PRO';
-      userWrapper.appendChild(proTag);
+      userWrapper.appendChild(proTag); // КЛАДЕМ ПЕРВОЙ
     }
+
+    // ЗАТЕМ ДОБАВЛЯЕМ ИМЯ
+    const nameSpan = document.createElement('span');
+    nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
+    nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
+    userWrapper.appendChild(nameSpan); // КЛАДЕМ ВТОРОЙ
 
     const logoutBtn = document.createElement('button');
     logoutBtn.onclick = signOut;
