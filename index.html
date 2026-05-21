@@ -621,7 +621,7 @@ async function analyzeCV() {
       document.getElementById('loadingState').classList.remove('active');
       document.getElementById('analyzeBtn').disabled = false;
       
-      alert("You've used all free scans. Please Sign In or Upgrade to Pro!");
+      showNotice("You've reached your free limit. Upgrade to Pro for unlimited scans!");
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
       return;
     }
@@ -710,13 +710,13 @@ async function showRewrite() {
 
   // 1. Проверка: был ли сделан анализ
   if (!currentAnalysisResults) {
-    alert('Please analyze your CV first!');
+    showNotice("Please analyze your CV first!");
     return;
   }
 
   // 2. Проверка: залогинен ли пользователь
   if (!currentUser) {
-    alert('Please Sign In with Google to access Pro features.');
+    showNotice("Please Sign In with Google to access Pro features.");
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
@@ -754,10 +754,10 @@ async function showRewrite() {
     } else {
       // Если не Pro или другая ошибка
       if (response.status === 403) {
-        alert('This is a Pro feature. Please upgrade your plan!');
+        showNotice("This is a Pro feature. Upgrade to Pro to unlock AI Rewrite.");
         document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
       } else {
-        alert('Error: ' + (data.error || 'Failed to rewrite resume'));
+        showNotice("AI Error: " + (data.error || "Please try again in a moment."));
       }
     }
   } catch (e) {
@@ -863,7 +863,7 @@ async function signInWithGoogle() {
       redirectTo: window.location.origin
     }
   });
-  if (error) alert("Error: " + error.message);
+  if (error) showNotice("Login Error: " + error.message);
 }
 
 // 2. Функция выхода
