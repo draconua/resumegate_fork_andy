@@ -1054,18 +1054,33 @@ async function updateUI(session) {
       }
     }
 
-    // 3. Рисуем меню пользователя (имя и выход)
+   // 3. Рисуем меню пользователя (имя + PRO + выход)
     authSection.innerHTML = '';
+    
+    const userWrapper = document.createElement('div');
+    userWrapper.style.display = 'flex';
+    userWrapper.style.alignItems = 'center';
+
     const nameSpan = document.createElement('span');
     nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
     nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
+    
+    userWrapper.appendChild(nameSpan);
+
+    // ЕСЛИ ПОЛЬЗОВАТЕЛЬ PRO — ДОБАВЛЯЕМ ПЛАШКУ
+    if (isPro) {
+      const proTag = document.createElement('span');
+      proTag.className = 'pro-tag';
+      proTag.textContent = 'PRO';
+      userWrapper.appendChild(proTag);
+    }
 
     const logoutBtn = document.createElement('button');
     logoutBtn.onclick = signOut;
-    logoutBtn.style.cssText = 'background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline; margin-left:10px;';
+    logoutBtn.style.cssText = 'background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline; margin-left:15px;';
     logoutBtn.textContent = 'Log Out';
 
-    authSection.append(nameSpan, logoutBtn);
+    authSection.append(userWrapper, logoutBtn);
 
   } else {
     // 4. Если пользователь НЕ залогинен (гость)
