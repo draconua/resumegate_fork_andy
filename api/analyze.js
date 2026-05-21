@@ -13,12 +13,11 @@ export default async function handler(req, res) {
     const { cvText, jobText, token } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // 1. Проверка лимитов (оставляем твою рабочую логику)
     let canScan = true;
     let userIdentifier = null;
     try {
       if (token) {
-        const { data: { user } } = await supabase.auth.getUser(token);
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         if (user) {
           userIdentifier = { type: 'member', id: user.id };
           const { data: profile } = await supabase.from('profiles').select('is_pro, scans_count').eq('id', user.id).maybeSingle();
@@ -32,16 +31,15 @@ export default async function handler(req, res) {
     } catch (e) { console.log("DB check skipped"); }
 
     if (!canScan) {
+      // Это ошибка клиента (код 403 - запрещено), здесь всё правильно
       return res.status(403).json({ error: "LIMIT_EXCEEDED", message: "Limit reached." });
     }
 
-    // 2. ЖЕСТКИЙ ПРОМПТ ДЛЯ GEMINI 2.5 FLASH
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
     const systemPrompt = `You are a professional ATS scanner. Today is ${today}.
     Analyze this CV against the Job Description.
-    
-    You MUST return ONLY a JSON object with this EXACT structure (no other keys):
+    You MUST return ONLY a JSON object with this EXACT structure:
     {
       "score": 85,
       "verdict": "Text verdict",
@@ -51,10 +49,7 @@ export default async function handler(req, res) {
       "keywordsMissing": ["keyword3"],
       "issues": [ { "text": "Issue description", "severity": "warning" } ],
       "recommendations": [ { "title": "Rec title", "detail": "Rec detail" } ]
-    }
-    
-    Severity for issues must be 'critical', 'warning', or 'info'.
-    Return ONLY JSON. No markdown.`;
+    }`;
 
     const userPrompt = `CV TEXT: ${cvText}\n\nJOB DESCRIPTION: ${jobText}`;
 
@@ -68,12 +63,23 @@ export default async function handler(req, res) {
     });
 
     const aiData = await response.json();
-    if (aiData.error) throw new Error(aiData.error.message);
 
-    // Берем текст и убираем лишнее
-    let cleanJson = aiData.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+    // --- ПРАВКА 1: Если сам Google вернул ошибку ---
+    if (aiData.error) {
+      console.error("Gemini direct error:", aiData.error);
+      return res.status(500).json({ error: aiData.error.message }); 
+    }
 
-    // 3. Обновляем счетчик в фоне
+    // --- ПРАВКА 2: Надежная очистка текста (Клод советовал) ---
+    // Сначала убеждаемся, что ответ вообще есть
+    if (!aiData.candidates || !aiData.candidates[0]) {
+      return res.status(500).json({ error: "AI returned empty response" });
+    }
+
+    let rawText = aiData.candidates[0].content.parts[0].text;
+    let cleanJson = rawText.replace(/```json|```/g, '').trim();
+
+    // Увеличение счетчика в фоне
     if (userIdentifier) {
       if (userIdentifier.type === 'member') {
         supabase.rpc('increment_scan_count', { user_id: userIdentifier.id }).then(()=>{});
@@ -82,11 +88,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // Отправляем результат
+    // Отправляем успешный результат (200)
     res.status(200).json({ content: cleanJson });
     
   } catch (error) {
-    console.error("API ERROR:", error.message);
-    res.status(200).json({ error: error.message });
+    console.error("CRITICAL API ERROR:", error.message);
+    // --- ПРАВКА 3: При любой системной ошибке возвращаем 500 ---
+    res.status(500).json({ error: error.message });
   }
 }
