@@ -652,59 +652,113 @@ async function analyzeCV() {
 }
   
 function renderResults(r) {
+  // 1. Баллы (Score)
   document.getElementById('scoreNum').textContent = r.score;
 
   const circumference = 2 * Math.PI * 62;
   const arc = document.getElementById('scoreArc');
   const color = r.score >= 75 ? '#2e7d52' : r.score >= 50 ? '#b5620e' : '#b52e2e';
-  arc.style.stroke = color;
-  setTimeout(() => {
-    arc.style.strokeDasharray = `${(r.score / 100) * circumference} ${circumference}`;
-    arc.style.transition = 'stroke-dasharray 1.2s ease';
-  }, 100);
+  if (arc) {
+    arc.style.stroke = color;
+    setTimeout(() => {
+      arc.style.strokeDasharray = `${(r.score / 100) * circumference} ${circumference}`;
+      arc.style.transition = 'stroke-dasharray 1.2s ease';
+    }, 100);
+  }
 
+  // 2. Вердикт и Суммари
   document.getElementById('scoreVerdict').textContent = r.verdict;
   document.getElementById('scoreSummary').textContent = r.summary;
 
+  // 3. Полоски (Sub-scores) — БЕЗОПАСНЫЙ РЕНДЕР
   const bars = document.getElementById('scoreBars');
-  bars.innerHTML = '';
+  bars.innerHTML = ''; // Очищаем один раз
   Object.entries(r.subScores || {}).forEach(([k, v]) => {
-    bars.innerHTML += `<div class="bar-row">
-      <span class="bar-name">${k.charAt(0).toUpperCase() + k.slice(1)}</span>
-      <div class="bar-track"><div class="bar-fill" data-val="${v}%" style="width:0%"></div></div>
-      <span class="bar-val">${v}</span>
-    </div>`;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    
+    const name = document.createElement('span');
+    name.className = 'bar-name';
+    name.textContent = k.charAt(0).toUpperCase() + k.slice(1).replace('_', ' ');
+
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.width = '0%'; // Сначала 0 для анимации
+    
+    const val = document.createElement('span');
+    val.className = 'bar-val';
+    val.textContent = v;
+
+    track.appendChild(fill);
+    row.append(name, track, val);
+    bars.appendChild(row);
+
+    // Запускаем анимацию полоски
+    setTimeout(() => { fill.style.width = v + '%'; fill.style.transition = 'width 1s ease'; }, 200);
   });
-  setTimeout(() => {
-    document.querySelectorAll('.bar-fill').forEach(b => {
-      b.style.width = b.dataset.val;
-      b.style.transition = 'width 1s ease';
+
+  // 4. Ключевые слова — БЕЗОПАСНЫЙ РЕНДЕР
+  const renderKeywords = (containerId, keywords, className) => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    (keywords || []).forEach(word => {
+      const span = document.createElement('span');
+      span.className = `kw-tag ${className}`;
+      span.textContent = word; // Вставляем как чистый текст
+      container.appendChild(span);
     });
-  }, 200);
+  };
+  renderKeywords('kwFound', r.keywordsFound, 'kw-found');
+  renderKeywords('kwMissing', r.keywordsMissing, 'kw-missing');
 
-  document.getElementById('kwFound').innerHTML = (r.keywordsFound || []).map(k => `<span class="kw-tag kw-found">${k}</span>`).join('');
-  document.getElementById('kwMissing').innerHTML = (r.keywordsMissing || []).map(k => `<span class="kw-tag kw-missing">${k}</span>`).join('');
-
-  document.getElementById('issuesList').innerHTML = (r.issues || []).map(iss => {
+  // 5. Ошибки (Issues) — БЕЗОПАСНЫЙ РЕНДЕР
+  const issuesContainer = document.getElementById('issuesList');
+  issuesContainer.innerHTML = '';
+  (r.issues || []).forEach(iss => {
+    const div = document.createElement('div');
     const cls = iss.severity === 'critical' ? 'issue-critical' : iss.severity === 'warning' ? 'issue-warning' : 'issue-info';
-    return `<div class="issue-item ${cls}"><div class="issue-dot"></div><span>${iss.text}</span></div>`;
-  }).join('');
+    div.className = `issue-item ${cls}`;
+    
+    const dot = document.createElement('div');
+    dot.className = 'issue-dot';
+    
+    const text = document.createElement('span');
+    text.textContent = iss.text;
 
-  document.getElementById('recoList').innerHTML = (r.recommendations || []).map((rec, i) => `
-    <div class="reco-item">
-      <div class="reco-num">${i + 1}</div>
-      <div class="reco-text"><strong>${rec.title}.</strong> ${rec.detail}</div>
-    </div>`).join('');
+    div.append(dot, text);
+    issuesContainer.appendChild(div);
+  });
 
-  if (lastRewrittenText) {
-    document.getElementById('rewrittenContent').textContent = lastRewrittenText;
-  }
+  // 6. Рекомендации (Recommendations)
+  const recoContainer = document.getElementById('recoList');
+  recoContainer.innerHTML = '';
+  (r.recommendations || []).forEach((rec, i) => {
+    const item = document.createElement('div');
+    item.className = 'reco-item';
+    
+    const num = document.createElement('div');
+    num.className = 'reco-num';
+    num.textContent = i + 1;
+
+    const content = document.createElement('div');
+    content.className = 'reco-text';
+    
+    const title = document.createElement('strong');
+    title.textContent = rec.title + ". ";
+    
+    const detail = document.createTextNode(rec.detail); // Безопасный текст после заголовка
+
+    content.append(title, detail);
+    item.append(num, content);
+    recoContainer.appendChild(item);
+  });
 
   document.getElementById('analyzeBtn').disabled = false;
   document.getElementById('results').classList.add('visible');
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
 async function showRewrite() {
   const btn = document.getElementById('rewrite-btn');
 
@@ -877,14 +931,28 @@ sb.auth.onAuthStateChange((event, session) => {
   const authSection = document.getElementById('auth-section');
   if (session) {
     currentUser = session.user;
-    authSection.innerHTML = `
-      <span style="font-size:13px; color:var(--ink-2); font-weight:600;">
-        Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}
-      </span>
-      <button onclick="signOut()" style="background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline;">
-        Log Out
-      </button>
-    `;
+    authSection.innerHTML = ''; // Очищаем
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.style.fontSize = '13px';
+    nameSpan.style.color = 'var(--ink-2)';
+    nameSpan.style.fontWeight = '600';
+    // Берем только имя и вставляем безопасно
+    nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.onclick = signOut;
+    logoutBtn.className = 'nav-cta'; // Или твои стили
+    logoutBtn.style.background = 'none';
+    logoutBtn.style.border = 'none';
+    logoutBtn.style.color = 'var(--ink-4)';
+    logoutBtn.style.cursor = 'pointer';
+    logoutBtn.style.fontSize = '12px';
+    logoutBtn.style.textDecoration = 'underline';
+    logoutBtn.style.marginLeft = '10px';
+    logoutBtn.textContent = 'Log Out';
+
+    authSection.append(nameSpan, logoutBtn);
   } else {
     currentUser = null;
     authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
