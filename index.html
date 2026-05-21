@@ -344,6 +344,40 @@
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-20px); }
   }
+
+  /* Контекстная подсказка под кнопкой логина */
+  .login-hint {
+    position: absolute;
+    top: 100%;           /* Строго под кнопкой */
+    right: 0;            /* Выравнивание по правому краю кнопки */
+    margin-top: 12px;    /* Отступ от кнопки */
+    background: var(--ink);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap; /* Текст в одну строку */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    pointer-events: auto;
+    animation: hintFadeIn 0.3s ease-out;
+  }
+
+  /* Треугольник сверху подсказки */
+  .login-hint::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    right: 24px;         /* Положение треугольника под кнопкой */
+    border: 6px solid transparent;
+    border-bottom-color: var(--ink);
+  }
+
+  @keyframes hintFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
@@ -903,13 +937,20 @@ async function showRewrite() {
 
 function handleUpgrade() {
   if (!currentUser) {
-    showNotice("Please Sign In with Google first to link your purchase to your account.");
-    // Прокручиваем наверх к кнопке логина через 1.5 секунды
+    // 1. Сначала плавно везем пользователя наверх к кнопке
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 2. Через полсекунды (когда страница доскроллится) показываем подсказку под кнопкой
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 1500);
+      showLoginHint("Please Sign In with Google first to link your purchase to your account.");
+    }, 600);
+    
     return;
   }
+  
+  const checkoutUrl = LEMON_URL + "?checkout[email]=" + encodeURIComponent(currentUser.email);
+  window.open(checkoutUrl, '_blank');
+}
 
   // Если пользователь вошел, формируем "умную" ссылку на оплату
   // Мы передаем его email в Lemon Squeezy заранее, чтобы он не ошибся при вводе
@@ -949,6 +990,30 @@ function downloadPDF() {
   const lines = doc.splitTextToSize(lastRewrittenText, 180);
   doc.text(lines, 15, 20);
   doc.save('ResumeGate_Improved.pdf');
+}
+
+function showLoginHint(message) {
+  const authSection = document.getElementById('auth-section');
+  if (!authSection) return;
+
+  // Если старая подсказка уже есть — удаляем, чтобы не плодить их
+  const oldHint = authSection.querySelector('.login-hint');
+  if (oldHint) oldHint.remove();
+
+  // Создаем элемент подсказки
+  const hint = document.createElement('div');
+  hint.className = 'login-hint';
+  hint.textContent = message;
+
+  // ВАЖНО: Делаем родителя relative, чтобы подсказка прикрепилась к нему
+  authSection.style.position = 'relative';
+  
+  authSection.appendChild(hint);
+
+  // Удаляем через 5 секунд
+  setTimeout(() => {
+    if (hint.parentNode) hint.remove();
+  }, 5000);
 }
 
 function downloadDOCX() {
