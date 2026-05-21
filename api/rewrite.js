@@ -5,21 +5,28 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
     const { cvText, jobText, analysisResults, token } = req.body;
 
-    // 1. Проверка PRO статуса через Supabase
+    // 1. Настройка Supabase и проверка токена
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
-    if (!user || authError) return res.status(401).json({ error: "Unauthorized" });
+    if (!user || authError) {
+      return res.status(401).json({ error: "Please sign in again." });
+    }
 
+    // 2. Проверка PRO статуса
     const { data: profile } = await supabase.from('profiles').select('is_pro').eq('id', user.id).single();
-    if (!profile?.is_pro) return res.status(403).json({ error: "Upgrade to PRO to unlock this feature" });
+    
+    if (!profile?.is_pro) {
+      return res.status(403).json({ error: "Upgrade to PRO to unlock this feature." });
+    }
 
-    // 2. Если пользователь PRO — запускаем мощный рерайт
+    // 3. Запрос к Gemini 2.5 Flash
     const apiKey = process.env.GEMINI_API_KEY;
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -38,7 +45,7 @@ export default async function handler(req, res) {
     TARGET JOB DESCRIPTION:
     ${jobText}
     
-    Return ONLY the rewritten text of the resume. No commentary. No JSON. Just the improved CV text.`;
+    Return ONLY the rewritten text of the resume. No commentary. No JSON. No Markdown backticks. Just the improved CV text.`;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
@@ -48,21 +55,29 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // ПРОВЕРКА: Если Google выдал ошибку
+    // --- ПРАВКИ ПО СОВЕТУ CLAUDE ---
+
+    // Если Google вернул ошибку (лимиты или перегрузка)
     if (data.error) {
-       return res.status(500).json({ error: `AI is overloaded: ${data.error.message}` });
+      console.error("Gemini Error:", data.error);
+      return res.status(500).json({ error: `AI Error: ${data.error.message}` });
     }
 
+    // Если ответ пустой
     if (!data.candidates || !data.candidates[0]) {
-       return res.status(500).json({ error: "AI returned empty response. Try again." });
+      return res.status(500).json({ error: "AI returned empty response. Please try again." });
     }
 
-    const rewrittenText = data.candidates[0].content.parts[0].text.trim();
-    res.status(200).json({ rewrittenResume: rewrittenText });
+    // Очистка текста от случайных Markdown-оберток (```text ... ```)
+    let rawText = data.candidates[0].content.parts[0].text;
+    let cleanText = rawText.replace(/```[a-z]*\n?|```/g, '').trim();
 
-  // ВОТ ЭТОГО КУСКА НЕ ХВАТАЛО:
+    // 4. Отправляем успешный результат
+    res.status(200).json({ rewrittenResume: cleanText });
+
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("Rewrite API Server Error:", error.message);
+    // Возвращаем статус 500 при любой системной ошибке
     res.status(500).json({ error: error.message });
   }
 }
