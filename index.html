@@ -500,7 +500,9 @@
         <li><strong>Download PDF & DOCX</strong></li>
         <li>Priority support</li>
       </ul>
-      <a href="https://theresumegate.lemonsqueezy.com/checkout/buy/2cc21afc-e128-4293-b2d0-4af55db2df4f" target="_blank" class="plan-btn" style="display:block; text-align:center; text-decoration:none; background:var(--ink); color:white; padding:12px; border-radius:7px; font-weight:600;">Upgrade to Pro →</a>
+      <button onclick="handleUpgrade()" class="plan-btn" style="width: 100%; background: var(--ink); color: white; border: none; padding: 12px; border-radius: 7px; font-weight: 600; cursor: pointer;">
+  Upgrade to Pro →
+</button>
     </div>
   </div>
 </section>
@@ -824,6 +826,23 @@ async function showRewrite() {
   }
 }
 
+function handleUpgrade() {
+  if (!currentUser) {
+    showNotice("Please Sign In with Google first to link your purchase to your account.");
+    // Прокручиваем наверх к кнопке логина через 1.5 секунды
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 1500);
+    return;
+  }
+
+  // Если пользователь вошел, формируем "умную" ссылку на оплату
+  // Мы передаем его email в Lemon Squeezy заранее, чтобы он не ошибся при вводе
+  const checkoutUrl = LEMON_URL + "?checkout[email]=" + encodeURIComponent(currentUser.email);
+  
+  window.open(checkoutUrl, '_blank');
+}
+  
 function showNotice(message) {
   // 1. Ищем контейнер или создаем его, если это первое уведомление
   let container = document.getElementById('toast-container');
