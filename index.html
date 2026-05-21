@@ -529,6 +529,19 @@ const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 let currentUser = null;
 
+// Функция для мгновенной проверки сессии при загрузке
+async function checkInitialSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    // Мы не вызываем здесь отрисовку вручную, 
+    // так как onAuthStateChange все равно сработает сам, 
+    // но теперь переменная currentUser будет заполнена сразу.
+  }
+}
+
+checkInitialSession();
+
 const loadingMessages = [
   'Parsing document structure...',
   'Checking ATS compatibility...',
