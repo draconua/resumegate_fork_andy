@@ -253,6 +253,44 @@
     .how-section, .pricing-section { padding: 48px 24px; }
     footer { flex-direction: column; gap: 12px; padding: 24px; text-align: center; }
   }
+  /* Контейнер для всех уведомлений */
+  #toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none; /* Чтобы контейнер не мешал кликать по меню */
+  }
+
+  /* Само уведомление */
+  .toast {
+    background: var(--ink); /* Темный фон в стиле твоего бренда */
+    color: white;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    min-width: 280px;
+    max-width: 400px;
+    pointer-events: auto; /* А на само уведомление можно нажать */
+    
+    /* Анимация появления и исчезновения */
+    animation: slideIn 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+  }
 </style>
 </head>
 <body>
@@ -730,6 +768,29 @@ async function showRewrite() {
     btn.innerHTML = originalText;
     btn.disabled = false;
   }
+}
+
+function showNotice(message) {
+  // 1. Ищем контейнер или создаем его, если это первое уведомление
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // 2. Создаем сам "тост"
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message; // textContent безопаснее, чем innerHTML
+
+  // 3. Добавляем в контейнер
+  container.appendChild(toast);
+
+  // 4. Удаляем уведомление через 3 секунды (когда закончится анимация)
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }
 
 function downloadPDF() {
