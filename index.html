@@ -940,22 +940,16 @@ function handleUpgrade() {
     // 1. Сначала плавно везем пользователя наверх к кнопке
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 2. Через полсекунды (когда страница доскроллится) показываем подсказку под кнопкой
+    // 2. Через полсекунды показываем подсказку под кнопкой
     setTimeout(() => {
       showLoginHint("Please Sign In with Google first to link your purchase to your account.");
     }, 600);
     
-    return;
+    return; // Выходим из функции
   }
   
+  // Если пользователь вошел, формируем ссылку и открываем оплату
   const checkoutUrl = LEMON_URL + "?checkout[email]=" + encodeURIComponent(currentUser.email);
-  window.open(checkoutUrl, '_blank');
-}
-
-  // Если пользователь вошел, формируем "умную" ссылку на оплату
-  // Мы передаем его email в Lemon Squeezy заранее, чтобы он не ошибся при вводе
-  const checkoutUrl = LEMON_URL + "?checkout[email]=" + encodeURIComponent(currentUser.email);
-  
   window.open(checkoutUrl, '_blank');
 }
   
