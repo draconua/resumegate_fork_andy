@@ -300,7 +300,7 @@
   <div class="nav-links">
     <a href="#tool">Checker</a>
     <a href="#how">How it works</a>
-    <a href="#pricing">Pricing</a>
+    <a href="#pricing" id="nav-pricing">Pricing</a>
   </div>
   <div id="auth-section" style="display: flex; align-items: center; gap: 12px;">
     <!-- Эта часть будет меняться через JavaScript -->
@@ -946,34 +946,51 @@ async function signOut() {
 }
 
 // 3. Следим за пользователем
-sb.auth.onAuthStateChange((event, session) => {
+sb.auth.onAuthStateChange(async (event, session) => {
   const authSection = document.getElementById('auth-section');
+  const pricingSection = document.getElementById('pricing');
+  const pricingLink = document.getElementById('nav-pricing');
+
   if (session) {
     currentUser = session.user;
-    authSection.innerHTML = ''; // Очищаем
     
+    // 1. Сразу проверяем Pro-статус при входе
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('is_pro')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+
+    const isPro = profile?.is_pro || false;
+
+    // 2. Если пользователь PRO — скрываем всё, что связано с продажами
+    if (isPro) {
+      if (pricingSection) pricingSection.style.display = 'none';
+      if (pricingLink) pricingLink.style.display = 'none';
+    } else {
+      // Если вошел, но не Pro — показываем цены (на случай если он раньше был Pro)
+      if (pricingSection) pricingSection.style.display = 'block';
+      if (pricingLink) pricingLink.style.display = 'block';
+    }
+
+    // 3. Обновляем меню (имя пользователя)
+    authSection.innerHTML = '';
     const nameSpan = document.createElement('span');
-    nameSpan.style.fontSize = '13px';
-    nameSpan.style.color = 'var(--ink-2)';
-    nameSpan.style.fontWeight = '600';
-    // Берем только имя и вставляем безопасно
+    nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
     nameSpan.textContent = `Hi, ${currentUser.user_metadata.full_name.split(' ')[0]}`;
 
     const logoutBtn = document.createElement('button');
     logoutBtn.onclick = signOut;
-    logoutBtn.className = 'nav-cta'; // Или твои стили
-    logoutBtn.style.background = 'none';
-    logoutBtn.style.border = 'none';
-    logoutBtn.style.color = 'var(--ink-4)';
-    logoutBtn.style.cursor = 'pointer';
-    logoutBtn.style.fontSize = '12px';
-    logoutBtn.style.textDecoration = 'underline';
-    logoutBtn.style.marginLeft = '10px';
+    logoutBtn.style.cssText = 'background:none; border:none; color:var(--ink-4); cursor:pointer; font-size:12px; text-decoration:underline; margin-left:10px;';
     logoutBtn.textContent = 'Log Out';
 
     authSection.append(nameSpan, logoutBtn);
+
   } else {
     currentUser = null;
+    // Если вышел — возвращаем цены и кнопку входа
+    if (pricingSection) pricingSection.style.display = 'block';
+    if (pricingLink) pricingLink.style.display = 'block';
     authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
   }
 });
