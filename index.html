@@ -56,6 +56,13 @@
   .nav-links { display: flex; gap: 32px; }
   .nav-links a { font-size: 14px; color: var(--ink-3); text-decoration: none; font-weight: 500; transition: color .2s; }
   .nav-links a:hover { color: var(--ink); }
+  .nav-links { 
+    display: flex; 
+    gap: 32px; 
+    /* Добавь это, чтобы зафиксировать ширину области ссылок, если хочешь идеала */
+    min-width: 300px; 
+    justify-content: center;
+  }
   .nav-cta { background: var(--ink); color: var(--paper); padding: 9px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background .2s; }
   .nav-cta:hover { background: var(--ink-2); }
 
@@ -969,7 +976,7 @@ async function signOut() {
 async function updateUI(session) {
   const authSection = document.getElementById('auth-section');
   const pricingSection = document.getElementById('pricing');
-  const pricingLink = document.getElementById('nav-pricing');
+  const pricingLink = document.getElementById('nav-pricing'); // Убедись, что этот ID есть в HTML
 
   if (session && session.user) {
     currentUser = session.user;
@@ -983,16 +990,30 @@ async function updateUI(session) {
 
     const isPro = profile?.is_pro || false;
 
-    // 2. Скрываем/Показываем блоки
+    // 2. УМНАЯ ЛОГИКА ДЛЯ PRICING (скрываем блок, меняем ссылку)
     if (isPro) {
+      // Скрываем только большой блок с ценами внизу
       if (pricingSection) pricingSection.style.display = 'none';
-      if (pricingLink) pricingLink.style.display = 'none';
+      
+      // Кнопку в меню НЕ скрываем, а меняем её смысл
+      if (pricingLink) {
+        pricingLink.style.display = 'block';
+        pricingLink.textContent = 'Manage Plan';
+        pricingLink.href = 'https://theresumegate.lemonsqueezy.com/billing';
+        pricingLink.target = '_blank'; // Открывать в новой вкладке
+      }
     } else {
+      // Если вошел, но не PRO (обычный пользователь)
       if (pricingSection) pricingSection.style.display = 'block';
-      if (pricingLink) pricingLink.style.display = 'block';
+      if (pricingLink) {
+        pricingLink.style.display = 'block';
+        pricingLink.textContent = 'Pricing';
+        pricingLink.href = '#pricing';
+        pricingLink.target = '_self';
+      }
     }
 
-    // 3. Рисуем меню пользователя
+    // 3. Рисуем меню пользователя (имя и выход)
     authSection.innerHTML = '';
     const nameSpan = document.createElement('span');
     nameSpan.style.cssText = 'font-size:13px; color:var(--ink-2); font-weight:600;';
@@ -1006,10 +1027,14 @@ async function updateUI(session) {
     authSection.append(nameSpan, logoutBtn);
 
   } else {
-    // Если пользователь НЕ залогинен
+    // 4. Если пользователь НЕ залогинен (гость)
     currentUser = null;
     if (pricingSection) pricingSection.style.display = 'block';
-    if (pricingLink) pricingLink.style.display = 'block';
+    if (pricingLink) {
+      pricingLink.style.display = 'block';
+      pricingLink.textContent = 'Pricing';
+      pricingLink.href = '#pricing';
+    }
     authSection.innerHTML = `<button class="nav-cta" onclick="signInWithGoogle()">Sign In with Google</button>`;
   }
 }
