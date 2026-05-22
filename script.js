@@ -1,10 +1,10 @@
-<script>
+// тут был <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-8LE4CP86M9');
-</script>
-<script>
+// тут был </script>
+// тут был <script>
 const LEMON_URL = 'https://theresumegate.lemonsqueezy.com/checkout/buy/2cc21afc-e128-4293-b2d0-4af55db2df4f';
 let lastRewrittenText = '';
 let currentAnalysisResults = null; // Добавь это: здесь мы будем хранить данные анализа
@@ -571,4 +571,4 @@ async function initSession() {
   updateUI(session);
 }
 initSession();
-</script>
+// тут был </script>
