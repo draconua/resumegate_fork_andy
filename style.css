@@ -101,10 +101,10 @@
   .panel-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); }
   .panel-badge { font-size: 11px; color: var(--ink-4); background: var(--paper-3); padding: 3px 8px; border-radius: 4px; }
   .panel-badge.required {
-  background: var(--accent-light); /* Светло-оранжевый */
-  color: var(--accent-dark);       /* Темно-оранжевый текст */
-  border: 1px solid rgba(200, 96, 42, 0.2); /* Тонкая рамка */
-  font-weight: 600;
+  background: var(--accent); /* Твой оранжевый */
+  color: white;              /* Белый текст для контраста */
+  font-weight: 700;          /* Жирный шрифт */
+  opacity: 1;                /* Полная яркость */
 }
   .upload-btn { background: var(--paper-3); color: var(--ink); border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
   textarea { width: 100%; min-height: 280px; border: none; outline: none; resize: vertical; padding: 20px; font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.8; color: var(--ink-2); background: white; caret-color: var(--accent); }
