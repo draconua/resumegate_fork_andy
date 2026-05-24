@@ -324,7 +324,7 @@
     top: 100%;           /* Строго под кнопкой */
     right: 0;            /* Выравнивание по правому краю кнопки */
     margin-top: 12px;    /* Отступ от кнопки */
-    background: var(--ink);
+    background: var(--accent);
     color: white;
     padding: 10px 16px;
     border-radius: 8px;
@@ -344,7 +344,7 @@
     bottom: 100%;
     right: 24px;         /* Положение треугольника под кнопкой */
     border: 6px solid transparent;
-    border-bottom-color: var(--ink);
+    border-bottom-color: var(--accent);
   }
 
   @keyframes hintFadeIn {
