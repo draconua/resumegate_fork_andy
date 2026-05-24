@@ -91,27 +91,30 @@
   .stats-bar { 
   display: flex; 
   justify-content: center; 
+  align-items: center;
   gap: 0; 
+  padding: 28px 48px; 
   border-top: 1px solid var(--border); 
-  border-bottom: 1px solid var(--border);
-  border-left: 1px solid var(--border);
-  margin-bottom: 64px;
-  overflow: hidden;
+  border-bottom: 1px solid var(--border); 
+  background: var(--paper-2); 
+  margin-bottom: 64px; 
 }
 
 .stat { 
   flex: 1;
   text-align: center;
-  padding: 24px 20px;
-  border-right: 1px solid var(--border);
+  padding: 0 24px;
+  position: relative;
 }
 
-.stat:nth-child(odd) { 
-  background: var(--paper); 
-}
-
-.stat:nth-child(even) { 
-  background: var(--paper-2); 
+.stat:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: var(--border);
 }
 .stat-num {
   /* Параметры строго по твоему скриншоту F12 */
