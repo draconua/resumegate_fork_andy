@@ -90,33 +90,25 @@
   /* STATS BAR */
   .stats-bar { display: flex; justify-content: center; gap: 48px; padding: 24px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--paper-2); margin-bottom: 64px; }
   .stat { text-align: center; }
-  .stat-num { 
-  /* 1. Возвращаем Playfair Display и принудительно ставим жирность */
-  font-family: 'Playfair Display', serif !important; 
-  font-weight: 900; 
-  font-size: 32px;
+.stat-num {
+  /* Параметры строго по твоему скриншоту F12 */
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--ink);
   line-height: 1;
 
-  /* 2. Магия выравнивания: заставляем цифры не "свисать" */
+  /* Это заставит цифры стоять ровно на одной линии, не меняя сам шрифт */
   font-variant-numeric: lining-nums;
-  font-feature-settings: "lnum"; /* Для поддержки во всех браузерах */
-
-  /* 3. Горизонтальное выравнивание */
-  display: flex;
-  justify-content: center;
-  align-items: baseline; /* Это приклеит % и числа к одной нижней линии */
-  gap: 2px; /* Расстояние между числом и символом */
+  font-feature-settings: "lnum";
 }
 
+/* Чтобы значки %, s, x не улетали вверх */
 .stat-num span {
-  /* Символ будет того же шрифта, но чуть меньше */
-  font-family: 'Playfair Display', serif !important;
-  font-size: 0.6em; 
-  font-weight: 700;
-  color: var(--ink-3);
-  /* Убираем лишние смещения */
-  vertical-align: baseline;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.7em; /* Чуть меньше цифры */
+  vertical-align: baseline; /* Держаться нижней линии */
+  margin-left: 1px;
 }
   .stat-label { font-size: 12px; color: var(--ink-4); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
 
