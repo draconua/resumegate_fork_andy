@@ -90,12 +90,7 @@
   /* STATS BAR */
   .stats-bar { display: flex; justify-content: center; gap: 48px; padding: 24px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--paper-2); margin-bottom: 64px; }
   .stat { text-align: center; }
-  .stat-num { 
-  font-family: 'Playfair Display', serif; 
-  font-size: 36px;           /* Сделаем чуть крупнее для солидности */
-  font-weight: 900;           /* Максимальная жирность */
-  color: var(--ink); 
-  line-height: 1;
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--ink); 
   
   /* МАГИЯ ВЫРАВНИВАНИЯ: */
   font-variant-numeric: lining-nums; /* Заставляет цифры стоять на одной линии */
