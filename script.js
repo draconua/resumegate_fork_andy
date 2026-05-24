@@ -104,7 +104,8 @@ async function analyzeCV() {
       stopLoading();
       document.getElementById('loadingState').classList.remove('active');
       document.getElementById('analyzeBtn').disabled = false;
-      showNotice("Free limit reached. Sign In or Upgrade to Pro!");
+      showLoginHint("Free limit reached. Sign In or Upgrade to Pro to continue!");
+      }, 600);
       document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
       return;
     }
