@@ -18,9 +18,24 @@
 --shadow: 0 2px 12px rgba(14,14,14,0.08);
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; border-bottom: 1px solid var(--border); background: var(--paper); position: sticky; top: 0; z-index: 100; }
-.logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; text-decoration: none; }
-.logo span { color: var(--accent); }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}.logo span { color: var(--accent); }
 .nav-back { font-size: 14px; color: var(--ink-3); text-decoration: none; font-weight: 500; transition: color .2s; }
 .nav-back:hover { color: var(--ink); }
 main { max-width: 760px; margin: 0 auto; padding: 56px 48px 96px; }
@@ -55,17 +70,23 @@ footer { text-align: center; padding: 28px; border-top: 1px solid var(--border);
 footer a { color: var(--ink-4); }
 footer a:hover { color: var(--accent); }
 @media (max-width: 640px) {
-nav { padding: 16px 20px; }
-main { padding: 40px 20px 80px; }
-h1 { font-size: 32px; }
+  header {
+    padding: 16px 20px;
+  }
+  main {
+    padding: 40px 20px 80px;
+  }
+  h1 {
+    font-size: 32px;
+  }
 }
 </style>
 </head>
 <body>
-<nav>
+<header>
   <a href="index.html" class="logo">Resume<span>Gate</span></a>
   <a href="index.html" class="nav-back">← Back to tool</a>
-</nav>
+</header>
 <main>
   <div class="badge">Legal</div>
   <h1>Terms of Service</h1>
