@@ -100,14 +100,21 @@ async function analyzeCV() {
     });
 
     const data = await response.json();
+// 6. ПРОВЕРКА ЛИМИТА ОТ СЕРВЕРА
     if (response.status === 403 && data.error === "LIMIT_EXCEEDED") {
       stopLoading();
       document.getElementById('loadingState').classList.remove('active');
       document.getElementById('analyzeBtn').disabled = false;
-      showLoginHint("Free limit reached. Sign In or Upgrade to Pro to continue!");
-      }, 600);
-      document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-      return;
+
+      // СНАЧАЛА: Плавный скролл вверх к кнопке логина
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // ЗАТЕМ: Запускаем таймер, чтобы подсказка выскочила после завершения скролла
+      setTimeout(() => {
+        showLoginHint("Free limit reached. Sign In or Upgrade to Pro to continue!");
+      }, 600); 
+
+      return; // Выходим из функции
     }
 
     if (!response.ok || data.error) throw new Error(data.error || 'Server error');
