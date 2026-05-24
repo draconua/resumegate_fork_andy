@@ -11,8 +11,14 @@
 </head>
 <body>
 <nav>
-  <a href="index.html" class="logo">Resume<span>Gate</span></a>
-  <a href="index.html" class="nav-back">← Back to tool</a>
+  <div class="nav-left">
+    <a href="index.html" class="logo" style="text-decoration: none;">Resume<span>Gate</span></a>
+  </div>
+  <!-- Мы оставляем ссылки в центре пустыми или Back, чтобы сохранить симметрию -->
+  <div class="nav-links">
+     <a href="index.html" class="nav-back">← Back to tool</a>
+  </div>
+  <div style="flex: 1;"></div> <!-- Пустая распорка справа для баланса -->
 </nav>
 <main class="legal-main">
   <div class="badge">Legal</div>
