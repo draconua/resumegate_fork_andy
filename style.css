@@ -90,7 +90,13 @@
   /* STATS BAR */
   .stats-bar { display: flex; justify-content: center; gap: 48px; padding: 24px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--paper-2); margin-bottom: 64px; }
   .stat { text-align: center; }
-  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--ink); }
+  .stat-num { 
+  font-family: 'DM Sans', sans-serif; /* Теперь шрифт как у этикеток */
+  font-size: 32px;                   /* Я чуть увеличил размер, так как DM Sans визуально мельче */
+  font-weight: 700;                  /* Оставляем жирным для акцента */
+  color: var(--ink);
+  letter-spacing: -0.5px;            /* Немного сблизим цифры для стиля */
+}
   .stat-label { font-size: 12px; color: var(--ink-4); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
 
   /* TOOL */
