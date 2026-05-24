@@ -70,12 +70,17 @@
     margin-bottom: 48px;
   }
 
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
   .card {
     background: white;
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 28px 32px;
-    margin-bottom: 16px;
     box-shadow: var(--shadow);
   }
 
@@ -168,6 +173,7 @@
     header { padding: 16px 20px; }
     main { padding: 40px 20px 80px; }
     h1 { font-size: 32px; }
+    .cards-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -182,6 +188,8 @@
   <div class="badge">Legal</div>
   <h1>Terms of Service</h1>
   <p class="page-meta">Last updated: May 2026</p>
+
+  <div class="cards-grid">
 
   <div class="card">
     <h2><span class="icon">📋</span> Acceptance of Terms</h2>
@@ -255,6 +263,8 @@
   <div class="card">
     <h2><span class="icon">📬</span> Contact</h2>
     <p>Questions about these terms? Reach us at <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a> or visit our <a href="contact.html">Contact page</a>.</p>
+  </div>
+
   </div>
 </main>
 
