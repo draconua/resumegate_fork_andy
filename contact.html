@@ -1,285 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contact — ResumeGate</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — ResumeGate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid #e8e5df;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
 
-    :root {
-      --bg: #f9f8f6;
-      --surface: #ffffff;
-      --border: #e8e5df;
-      --accent: #c96442;
-      --text-primary: #1a1917;
-      --text-secondary: #6b6760;
-      --text-muted: #9e9b96;
-      --radius: 12px;
-      --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-    }
+  header .logo {
+    text-decoration: none;
+  }
+  header .logo:hover {
+    text-decoration: underline;
+  }
 
-    body {
-      font-family: 'Sora', sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      line-height: 1.7;
-      min-height: 100vh;
-    }
+  .back-link {
+    font-size: 13px;
+    color: var(--ink-3);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
 
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+  main {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 56px 48px 96px;
+  }
 
-    .logo {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
-    .logo span { color: var(--accent); }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Sora', sans-serif;
+    color: var(--accent);
+    background: rgba(200, 96, 42, 0.08);
+    border: 1px solid rgba(200, 96, 42, 0.18);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
 
-    .back-link {
-      font-size: 13px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.15s;
-    }
-    .back-link:hover { color: var(--accent); }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
 
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 48px 24px 80px;
-    }
+  .subtitle {
+    font-size: 15px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
 
-    .page-header { margin-bottom: 40px; }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
 
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--accent);
-      background: rgba(201, 100, 66, 0.08);
-      border: 1px solid rgba(201, 100, 66, 0.18);
-      padding: 3px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: var(--shadow);
+  }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 600;
-      letter-spacing: -0.03em;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-    }
+  .card h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-    .subtitle {
-      font-size: 15px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-    }
+  .card h2 .icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
 
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+  .card p {
+    font-size: 14px;
+    color: var(--ink-3);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+  .card p:last-child { margin-bottom: 0; }
 
-    @media (max-width: 520px) {
-      .contact-grid { grid-template-columns: 1fr; }
-    }
+  .card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .card a:hover { text-decoration: underline; }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px 28px;
-      box-shadow: var(--shadow);
-    }
+  .card-full {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
 
-    .card-full {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 32px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-    }
+  .card-full h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-2);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-    .contact-card {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+  .card-full h2 .icon {
+    width: 28px;
+    height: 28px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
 
-    .contact-card .icon-wrap {
-      width: 36px;
-      height: 36px;
-      background: rgba(201, 100, 66, 0.08);
-      border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      margin-bottom: 4px;
-    }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
 
-    .contact-card h3 {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: -0.01em;
-    }
+  @media (max-width: 520px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
 
-    .contact-card p {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
 
-    .contact-card a {
-      font-size: 13px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .contact-card a:hover { text-decoration: underline; }
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    letter-spacing: 0.01em;
+  }
 
-    /* Form */
-    .card-full h2 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-      letter-spacing: -0.01em;
-    }
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200, 96, 42, 0.1);
+  }
 
-    @media (max-width: 520px) {
-      .form-row { grid-template-columns: 1fr; }
-    }
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: -0.01em;
+  }
+  .btn:hover { opacity: 0.88; }
+  .btn:active { transform: scale(0.98); }
 
-    label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      letter-spacing: 0.01em;
-    }
+  .success-msg {
+    display: none;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #15803d;
+    margin-top: 14px;
+  }
 
-    input, select, textarea {
-      font-family: 'Sora', sans-serif;
-      font-size: 13px;
-      color: var(--text-primary);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      width: 100%;
-    }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .faq-item:first-child { padding-top: 0; }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
-    }
+  .faq-q {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .faq-a {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+  .faq-a a { color: var(--accent); }
 
-    textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
+  footer {
+    text-align: center;
+    padding: 28px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-4);
+    background: var(--paper-2);
+  }
+  footer a { color: var(--ink-4); }
+  footer a:hover { color: var(--accent); }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 11px 22px;
-      font-family: 'Sora', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-      letter-spacing: -0.01em;
-    }
-    .btn:hover { opacity: 0.88; }
-    .btn:active { transform: scale(0.98); }
-
-    .success-msg {
-      display: none;
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #15803d;
-      margin-top: 14px;
-    }
-
-    .faq-item {
-      border-bottom: 1px solid var(--border);
-      padding: 16px 0;
-    }
-    .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .faq-item:first-child { padding-top: 0; }
-
-    .faq-q {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-    .faq-a {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    footer {
-      text-align: center;
-      padding: 24px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    footer a { color: var(--text-muted); }
-    footer a:hover { color: var(--accent); }
-  </style>
+  @media (max-width: 640px) {
+    header { padding: 16px 20px; }
+    main { padding: 40px 20px 80px; }
+    h1 { font-size: 32px; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
@@ -289,29 +288,25 @@
 </header>
 
 <main>
-  <div class="page-header">
-    <div class="badge">Support</div>
-    <h1>Contact</h1>
-    <p class="subtitle">Have a question or issue? We're here to help.</p>
-  </div>
+  <div class="badge">Support</div>
+  <h1>Contact</h1>
+  <p class="subtitle">Have a question or issue? We're here to help.</p>
 
-  <div class="contact-grid">
-    <div class="card contact-card">
-      <div class="icon-wrap">✉️</div>
-      <h3>General Inquiries</h3>
+  <div class="cards-grid">
+    <div class="card">
+      <h2><span class="icon">✉️</span> General Inquiries</h2>
       <p>Questions about the product, features, or anything else.</p>
-      <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a>
+      <p><a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a></p>
     </div>
-    <div class="card contact-card">
-      <div class="icon-wrap">🔑</div>
-      <h3>Pro / Billing Support</h3>
+    <div class="card">
+      <h2><span class="icon">🔑</span> Pro / Billing Support</h2>
       <p>Payment questions, account access, subscription issues.</p>
-      <a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a>
+      <p><a href="mailto:gateresume@gmail.com">gateresume@gmail.com</a></p>
     </div>
   </div>
 
   <div class="card-full">
-    <h2>Send us a message</h2>
+    <h2><span class="icon">💬</span> Send us a message</h2>
 
     <div class="form-row">
       <div class="form-group" style="margin-bottom:0">
@@ -351,7 +346,7 @@
   </div>
 
   <div class="card-full">
-    <h2>Frequently Asked Questions</h2>
+    <h2><span class="icon">❓</span> Frequently Asked Questions</h2>
 
     <div class="faq-item">
       <div class="faq-q">I can't log in to my Pro account — what should I do?</div>
